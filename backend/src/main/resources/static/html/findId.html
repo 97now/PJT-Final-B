@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>아이디 찾기</title>
+    <link rel="stylesheet" href="../css/user.css" />
+    <style>
+      .auth-method {
+        display: flex;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .auth-option {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        background-color: #fff;
+        border-right: 1px solid #ccc;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .auth-option:last-child {
+        border-right: none;
+      }
+
+      .auth-option input[type="radio"] {
+        margin-right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>아이디 찾기</h1>
+      <form class="signup-form">
+        <label>인증방식</label>
+        <div class="auth-method">
+          <label class="auth-option">
+            <input type="radio" name="auth" value="phone" checked />
+            휴대전화
+          </label>
+          <label class="auth-option">
+            <input type="radio" name="auth" value="email" />
+            이메일
+          </label>
+        </div>
+
+        <label for="name">이름</label>
+        <input type="text" id="name" placeholder="이름을 입력하세요" />
+
+        <label for="phone">휴대전화</label>
+        <input
+          type="text"
+          id="phone"
+          placeholder="휴대폰 번호 입력('-' 제외 11자리 입력)"
+        />
+
+        <button type="submit" class="submit-btn">아이디 찾기</button>
+      </form>
+
+      <div style="text-align: center; margin: 50px">
+        <a href="#" style="text-align: center; margin-top: 16px"
+          >비밀번호를 찾으시나요?</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

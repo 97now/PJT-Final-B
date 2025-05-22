@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.pjtFinal.model.dao.UserDao">
+    <!--유저 등록-->
+    <insert id="userInsert">
+        INSERT INTO user (user_id, user_pw, user_nick_name, user_email, user_phone, created_at)
+        VALUES(#{userId}, #{userPw}, #{userNickName}, #{userEmail}, #{userPhone}, current_timestamp())
+    </insert>
+
+    <!--유저 하나 조회-->
+    <select id="userSelectOne" parameterType="String" resultType="User">
+        SELECT * FROM user
+        WHERE user_id=#{userId}
+    </select>
+
+    <!--유저 전체 조회-->
+    <select id="userSelectAll" resultType="User">
+        SELECT * FROM user
+    </select>
+
+    <!--유저 수정-->
+    <update id="userUpdate" parameterType="User">
+        UPDATE user SET
+        user_id=#{userId},user_pw=#{userPw},user_nick_name=#{userNickName},user_email=#{userEmail}, user_phone=#{userPhone}
+        WHERE user_id=#{userId}
+    </update>
+
+    <!--유저 삭제-->
+    <delete id="userDelete" parameterType="String">
+        DELETE FROM user
+        WHERE user_id=#{userId}
+    </delete>
+</mapper>

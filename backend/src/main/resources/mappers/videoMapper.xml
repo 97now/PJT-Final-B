@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.pjtFinal.model.dao.VideoDao">
+    <!--비디오 등록-->
+    <insert id="videoInsert" parameterType="Video">
+        INSERT INTO video (
+        video_title,
+        video_part,
+        video_url,
+        video_view_cnt,
+        video_channel_name,
+        org_img_name,
+        unq_img_name
+        )
+        VALUES (
+        #{videoTitle},
+        #{videoPart},
+        #{videoUrl},
+        #{videoViewCnt},
+        #{videoChannelName},
+        #{orgImgName},
+        #{unqImgName}
+        )
+    </insert>
+
+    <!--비디오 모두 보여주기-->
+    <select id="videoSelectAll" resultType="Video">
+        SELECT * FROM video
+    </select>
+
+    <!--비디오 하나 찾아서 보여주기-->
+    <select id="videoSelectOne" resultType="Video" parameterType="int">
+        SELECT * FROM video
+        WHERE video_id=#{videoId}
+    </select>
+
+    <!--비디오 수정-->
+    <update id="videoUpdate" parameterType="Video">
+        UPDATE video
+        SET
+        video_title=#{videoTitle},
+        video_part = #{videoPart},
+        video_url=#{videoUrl},
+        video_view_cnt=#{videoViewCnt},
+        video_channel_name=#{videoChannelName},
+        org_img_name = #{orgImgName},
+        unq_img_name=#{unqImgName}
+        WHERE video_id=#{videoId}
+    </update>
+
+    <!--비디오 삭제-->
+    <delete id="videoDelete" parameterType="int">
+        DELETE FROM video
+        WHERE video_id=#{videoId}
+    </delete>
+
+    <!--비디오 검색-->
+    <select id="videoSearch" parameterType="SearchCondition" resultType="Video">
+        SELECT * FROM video
+        <if test="key != null and word != null">
+            WHERE ${key} = #{word}
+        </if>
+        <if test="orderBy != null">
+            ORDER BY #{orderBy} #{orderByDir}
+        </if>
+    </select>
+
+    <!--조회수 증가-->
+    <update id="videoUpdateViewCount" parameterType="int">
+        UPDATE video SET video_view_cnt = video_view_cnt + 1 WHERE video_id = #{videoId}
+    </update>
+
+
+</mapper>

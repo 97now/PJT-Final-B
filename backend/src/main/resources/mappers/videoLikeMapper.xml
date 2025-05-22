@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.pjtFinal.model.dao.VideoLikeDao">
+    <insert id="insertVideoLike" parameterType="VideoLike">
+        INSERT INTO video_like (user_id, video_id, liked_at)
+        VALUES (#{userId}, #{videoId}, current_timestamp())
+    </insert>
+
+    <select id="selectLikedVideoList" parameterType="String" resultType="Video">
+        SELECT v.*
+        FROM video_like vl
+        INNER JOIN video v
+        ON vl.video_id = v.video_id
+        WHERE vl.user_id = #{userId}
+        ORDER BY vl.liked_at DESC
+    </select>
+
+    <select id="selectLikedVideoListByFollowingList" parameterType="String" resultType="VideoWithLikeUser">
+        SELECT v.*, u.user_id, u.nickname, vl.liked_at
+        FROM follow f
+            INNER JOIN video_like vl ON f.followee = vl.user_id
+            INNER JOIN video v ON vl.video_id = v.video_id
+            INNER JOIN user u ON vl.user_id = u.user_id
+        WHERE f.follower = #{follower}
+        ORDER BY vl.liked_at DESC
+    </select>
+
+    <select id="checkLikedVideo">
+        SELECT 1
+        FROM video_like
+        WHERE user_id = #{userId} and video_id = #{videoId}
+    </select>
+
+    <select id="LikeCountByVideoId">
+        SELECT COUNT(*)
+        FROM video_like
+        WHERE video_id = #{videoId}
+    </select>
+
+    <update id="updateLikeCountByVideoId">
+        UPDATE video
+        SET video_like_cnt = video_like_cnt + #{change}
+        WHERE video_id = #{videoId}
+    </update>
+
+    <delete id="deleteVideoLike">
+        DELETE FROM video_like
+        WHERE user_id = #{userId} and video_id = #{videoId}
+    </delete>
+</mapper>

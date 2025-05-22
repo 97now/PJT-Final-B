@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.pjtFinal.model.dao.ReviewDao">
+    <!--리뷰 등록-->
+    <insert id="reviewInsert">
+        INSERT INTO review (video_id, review_user_id, review_content, review_user_nick_name, review_regist_date)
+        VALUES(#{videoId}, #{reviewUserId}, #{reviewContent}, #{reviewUserNickName}, current_timestamp())
+    </insert>
+
+    <!-- 비디오, 유저 아이디 등 특정 조건에 따른 리뷰 목록 가져오기-->
+    <select id="reviewSelectAllByCondition" parameterType="SearchCondition" resultType="Review">
+        SELECT * FROM review
+        <where>
+            <choose>
+                <when test="key == video_id">
+                    video_id = #{word}
+                </when>
+                <when test="key == user_id">
+                    review_user_id = #{word}
+                </when>
+            </choose>
+        </where>
+        <if test="orderBy != null">
+            ORDER BY #{orderBy} #{orderByDir}
+        </if>
+    </select>
+
+    <!--  모든 리뷰 가져오기 -->
+    <select id="reviewSelectAll" resultType="Review">
+        SELECT * FROM review
+    </select>
+
+    <!--리뷰 가져오기-->
+    <select id="reviewSelectOne" resultType="Review" parameterType="int">
+        SELECT * FROM review
+        WHERE review_id=#{reviewId}
+    </select>
+
+    <!--리뷰 수정-->
+    <update id="reviewUpdate" parameterType="Review">
+        UPDATE review
+        SET
+        review_content=#{reviewContent}
+        WHERE review_id=#{reviewId}
+    </update>
+
+    <!--리뷰 삭제-->
+    <delete id="reviewDelete" parameterType="int">
+        DELETE FROM review
+        WHERE review_id=#{reviewId}
+    </delete>
+</mapper>
