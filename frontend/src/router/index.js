@@ -58,6 +58,8 @@ const routes = [
     name: "video-detail",
     component: VideoDetailView,
   },
+  { path: '/video/:id', 
+    component: VideoDetailView },
 ];
 
 const router = createRouter({

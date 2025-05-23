@@ -1,6 +1,8 @@
 package com.ssafy.pjtFinal.model.dto;
 
 public class SearchCondition {
+ // 필요하다면 추가
+
     private String key;
     private String word;
     private String orderBy;
