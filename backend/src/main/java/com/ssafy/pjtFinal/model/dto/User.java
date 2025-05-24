@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 @ToString
 public class User {
     @NotBlank
+    @Pattern(regexp = "^[a-z0-9]{8,20}$", message = "영어 소문자 또는 숫자로만 이루어진 8~20자여야 합니다.")
     private String userId;
 
     @NotBlank
@@ -27,8 +30,10 @@ public class User {
     @Email
     private String userEmail;
 
-    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "전화번호는 000-0000-0000 형식이어야 합니다")
+    @Pattern(regexp = "^010[0-9]{8}$", message = "전화번호는 010으로 시작하는 11자리 숫자여야 합니다")
     private String userPhone;
+
+    private LocalDate userBirth;
 
     private LocalDateTime createdAt;
 

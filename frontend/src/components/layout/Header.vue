@@ -3,7 +3,7 @@
     <div class="header-title">
       <router-link to="/">SSAFIT</router-link>
     </div>
-    <nav v-if="!loggedIn" class="header-actions">
+    <nav v-if="!isLoggedIn" class="header-actions">
       <i class="fas fa-user header-icon"></i>
       <img :src="adduserIcon" alt="signup" class="icon" />
       <router-link :to="{ name: 'signUp' }" class="header-link"
@@ -34,16 +34,20 @@
 
 <script setup>
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 
 import adduserIcon from "@/assets/img/Add_User.png";
 import loginIcon from "@/assets/img/Login.png";
 
-const loggedIn = ref(true);
+const userStore = useUserStore();
+
+const { isLoggedIn } = storeToRefs(userStore);
 
 const logOut = () => {
-  console.log(loggedIn.value);
-  loggedIn.value = !loggedIn.value;
+  console.log(isLoggedIn.value);
+  isLoggedIn.value = !isLoggedIn.value;
 };
 </script>
 

@@ -5,10 +5,10 @@
         :img="imgUrl"
         alt="내 프로필 이미지"
         @click="goToDefault"
-        style="cursor:pointer"
+        style="cursor: pointer"
       />
-      <div class="nickname" @click="goToDefault" style="cursor:pointer">
-        <p>{{ userId }}</p>
+      <div class="nickname" @click="goToDefault" style="cursor: pointer">
+        <p>{{ user.userNickName }}</p>
       </div>
     </div>
     <div class="follow">
@@ -17,14 +17,14 @@
         class="follow-btn"
         @click="goToFollowing"
       >
-        Following &nbsp; {{ followingNum }} 명
+        Following &nbsp; {{ user.followingCnt }} 명
       </div>
       <div
         :class="{ active: currentView === 'follower' }"
         class="follow-btn"
         @click="goToFollower"
       >
-        Follower &nbsp; {{ followerNum }} 명
+        Follower &nbsp; {{ user.followerCnt }} 명
       </div>
     </div>
 
@@ -36,34 +36,36 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
 
+const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
+const { user } = storeToRefs(userStore);
+
 const imgUrl = ref("/User.png");
-const userId = ref("KIM");
-const followingNum = ref(4); // 실제 데이터로 교체
-const followerNum = ref(6);  // 실제 데이터로 교체
 
 const currentView = computed(() => {
   const relation = route.params.relation;
-  return relation || 'default';
+  return relation || "default";
 });
 
 function goToDefault() {
-  router.push(`/${userId.value}/myPage`);
+  router.push(`/${user.value.userId}/myPage`);
 }
 
 function goToFollowing() {
-  router.push(`/${userId.value}/myPage/follow-list/following`);
+  router.push(`/${user.value.userId}/myPage/follow-list/following`);
 }
 
 function goToFollower() {
-  router.push(`/${userId.value}/myPage/follow-list/follower`);
+  router.push(`/${user.value.userId}/myPage/follow-list/follower`);
 }
 </script>
 

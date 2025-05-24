@@ -8,8 +8,9 @@ CREATE TABLE user
 (
     user_id        VARCHAR(50) PRIMARY KEY,
     user_pw        VARCHAR(255) NOT NULL,
-    user_nick_name VARCHAR(50)  NOT NULL UNIQUE,
-    user_email     VARCHAR(100) NOT NULL UNIQUE,
+    user_nick_name VARCHAR(50)  NOT NULL,
+    user_email     VARCHAR(100) NOT NULL,
+    user_birth     DATE,
     user_phone     VARCHAR(20),
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     follower_cnt   int      DEFAULT 0,
