@@ -6,6 +6,9 @@ export const useUserStore = defineStore("user", {
     user: null,
     isLoggedIn: false,
     error: null,
+    followingList: [],
+    followerList: [],
+    isFollowed: false,
   }),
 
   getters: {
@@ -15,6 +18,9 @@ export const useUserStore = defineStore("user", {
   },
 
   actions: {
+    /*
+    유저 관리
+    */
     // 아이디 중복 확인
     async checkDuplicatedId(userId) {
       try {
@@ -127,6 +133,81 @@ export const useUserStore = defineStore("user", {
           error.response?.data?.message ||
           "사용자 삭제 중 오류가 발생했습니다.";
         throw error;
+      }
+    },
+
+    /*
+    팔로우 관리
+    */
+    // 내가 팔로잉하는 목록
+    async fetchFollowingList(userId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/follow/${userId}/following`
+        );
+        this.followingList = response.data || [];
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "팔로잉 목록 조회 중 오류가 발생했습니다.";
+        this.followingList = [];
+      }
+    },
+
+    // 나를 팔로우하는 목록
+    async fetchFollowerList(userId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/follow/${userId}/follower`
+        );
+        this.followerList = response.data || [];
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "팔로워 목록 조회 중 오류가 발생했습니다.";
+        this.followerList = [];
+      }
+    },
+
+    // 팔로우 추가
+    async followUser(targetId) {
+      try {
+        await axios.post(`http://localhost:8080/api/follow`, {
+          follower: this.user.userId,
+          followee: targetId,
+        });
+        this.isFollowed = true;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message || "팔로우 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
+    // 언팔로우
+    async unfollowUser(targetId) {
+      try {
+        await axios.delete(`http://localhost:8080/api/follow/${targetId}`);
+        this.isFollowed = false;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message || "언팔로우 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
+    // 팔로우 여부 체크
+    async checkFollowed(targetId) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/follow/${targetId}/check`
+        );
+        this.isFollowed = response.data;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "팔로우 여부 확인 중 오류가 발생했습니다.";
+        this.isFollowed = false;
       }
     },
 

@@ -11,6 +11,7 @@
         <p>{{ user.userNickName }}</p>
       </div>
     </div>
+
     <div class="follow">
       <div
         :class="{ active: currentView === 'following' }"
@@ -42,6 +43,7 @@ import { useUserStore } from "@/stores/userStore";
 import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
+import SearchBar from "@/components/common/SearchBar.vue";
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -114,7 +116,7 @@ function goToFollower() {
   text-align: center;
   align-items: center;
   font-weight: 500;
-  color: black;
+  color: #555;
   cursor: pointer;
   user-select: none;
   padding: 0 8px;
@@ -123,8 +125,8 @@ function goToFollower() {
 }
 
 .follow-btn.active {
+  color: black;
   font-weight: bold;
   text-decoration: underline;
-  background: #f0f0f0;
 }
 </style>

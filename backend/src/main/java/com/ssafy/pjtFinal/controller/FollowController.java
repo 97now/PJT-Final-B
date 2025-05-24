@@ -82,7 +82,7 @@ public class FollowController {
     }
 
     // 팔로우 삭제
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/{targetId}")
     public ResponseEntity<Void> deleteFollow(HttpSession session, @PathVariable String targetId) {
         User follower = (User) session.getAttribute("loginUser");
         User followee = userService.getUserOne(targetId);
