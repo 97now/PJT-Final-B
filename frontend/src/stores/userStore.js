@@ -55,12 +55,18 @@ export const useUserStore = defineStore("user", {
     // 로그인
     async login(loginData) {
       try {
-        await axios.post("http://localhost:8080/api/user/login", loginData);
+        const response = await axios.post(
+          "http://localhost:8080/api/user/login",
+          loginData
+        );
         this.isLoggedIn = true;
-        await this.fetchUserInfo();
+        this.user = response.data;
+
+        console.log(this.user);
       } catch (error) {
-        this.error =
+        const msg =
           error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
+        this.error = msg;
         throw error;
       }
     },
@@ -129,4 +135,6 @@ export const useUserStore = defineStore("user", {
       this.error = null;
     },
   },
+
+  persist: true,
 });

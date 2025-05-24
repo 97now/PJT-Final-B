@@ -123,12 +123,14 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useUserStore } from "@/stores/userStore";
+import { useRouter } from "vue-router";
 import BaseInput from "@/components/common/BaseInput.vue";
 import EmailDomainDropbox from "@/components/common/EmailDomainDropbox.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import BaseDropBox from "@/components/common/BaseDropBox.vue";
 
 const userStore = useUserStore();
+const router = useRouter();
 
 // 담아줄 데이터
 const userId = ref("");
@@ -281,15 +283,13 @@ const restrictPhoneInput = (event) => {
   const numbersOnly = input.replace(/[^0-9]/g, "");
   // 11자리로 제한
   userPhone.value = numbersOnly.slice(0, 11);
-  // 입력값이 변경되면 유효성 검사 실행
-  phoneValidationCheck();
 };
 
 // 휴대폰 번호 정규식 검사
 const phoneValidationCheck = () => {
   if (userPhone.value.length < 11) {
     isValidPhone.value = false;
-    phoneErrorMsg.value = "";
+    phoneErrorMsg.value = "전화번호는 010으로 시작하는 11자리 숫자여야 합니다";
     return;
   }
 
@@ -319,14 +319,13 @@ const emailValidationCheck = () => {
 };
 
 // 제출
-const onSubmit = () => {
+const onSubmit = async () => {
   if (!isIdChecked.value) {
     idErrorMsg.value = "아이디 중복검사를 해주세요";
     return;
   }
 
   idValidationCheck();
-  pwValidationCheck();
   phoneValidationCheck();
   emailValidationCheck();
 
@@ -337,6 +336,15 @@ const onSubmit = () => {
     !isValidPhone.value ||
     !isValidEmail.value
   ) {
+    console.log("isValidId : " + isValidId.value + " " + idErrorMsg.value);
+    console.log("isValidPw : " + isValidPw.value + " " + pwErrorMsg.value);
+    console.log("isSamePw : " + isSamePw.value + " " + pwCheckErrorMsg.value);
+    console.log(
+      "isValidPhone : " + isValidPhone.value + " " + phoneErrorMsg.value
+    );
+    console.log(
+      "isValidEmail : " + isValidEmail.value + " " + emailErrorMsg.value
+    );
     return;
   }
 
@@ -352,9 +360,13 @@ const onSubmit = () => {
     )}-${String(birthDay.value).padStart(2, "0")}`,
   };
 
-  console.log(user);
-
-  userStore.register(user);
+  try {
+    await userStore.register(user);
+    alert("회원가입 성공 ⭐");
+    router.push("/login");
+  } catch (error) {
+    alert("회원가입 중 오류 발생ㅠㅠ");
+  }
 };
 </script>
 
