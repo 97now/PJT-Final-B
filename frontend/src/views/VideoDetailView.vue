@@ -1,30 +1,81 @@
 <script setup>
-import { ref } from "vue";
-
-const comments = ref([
-  { id: 1, text: "정말 재미있어요" },
-  { id: 2, text: "유익해요" },
-  { id: 3, text: "근성장 맛보기" },
-  { id: 4, text: "3대 500가즈아" },
-  { id: 5, text: "집중력 최고" },
-  { id: 6, text: "발린이를 위한 운동" },
-]);
-const likes = ref(100);
-const views = ref(1234);
-
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
 import eyeIcon from "@/assets/img/Eye.png";
 import heartIcon from "@/assets/img/Heart.png";
-import videoCallIcon from "@/assets/img/Video_Call.png";
-</script>
 
+const route = useRoute();
+
+const videoTitle = ref("");
+const likes = ref(0);
+const views = ref(0);
+const videoUrl = ref("");
+const comments = ref([]);
+
+function getYoutubeId(url) {
+  if (!url) return '';
+  const regExp = /(?:youtube\.com.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match && match[1] ? match[1] : '';
+}
+
+const youtubeEmbedUrl = computed(() => {
+  const id = getYoutubeId(videoUrl.value);
+  return id ? `https://www.youtube.com/embed/${id}` : '';
+});
+
+function getYoutubeThumbnail(url) {
+  if (!url) return '';
+  const regExp = /(?:youtube\.com.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match && match[1]
+    ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`
+    : '';
+}
+
+onMounted(() => {
+  const videoId = route.params.id;
+
+  axios.get(`/api/video/${videoId}`).then(res => {
+    videoTitle.value = res.data.videoTitle;
+    likes.value = res.data.videoLikeCnt;
+    views.value = res.data.videoViewCnt;
+    videoUrl.value = res.data.videoUrl;
+  });
+
+  axios.get('/api/review', {
+    params: {
+      key: 'video_id',
+      word: videoId
+    }
+  }).then(res => {
+    comments.value = res.data.map(r => ({
+      id: r.reviewId,
+      text: r.reviewContent,
+      user: r.reviewUserNickName,
+      date: r.reviewRegistDate
+    }));
+  });
+});
+
+</script>
 <template>
   <div class="video-detail">
     <div class="video-area">
       <div class="video-thumb">
-        <img :src="videoCallIcon" alt="썸네일" />
-      </div>
+        <iframe
+          v-if="youtubeEmbedUrl"
+          width="100%"
+          height="340"
+          :src="youtubeEmbedUrl"
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+          allowfullscreen>
+        </iframe>
+</div>
       <div class="video-meta-bar">
-        <div class="video-title">{{ "OOOOO 영상" }}</div>
+        <div class="video-title">{{ videoTitle }}</div>
         <div class="video-stats-col">
           <span class="icon-wrap">
             <img :src="eyeIcon" alt="조회수" class="icon" />
@@ -38,18 +89,12 @@ import videoCallIcon from "@/assets/img/Video_Call.png";
       </div>
     </div>
     <hr class="divider" />
-
     <ul class="comment-list">
-      <li
-        v-for="(comment, idx) in comments"
-        :key="comment.id"
-        class="comment-item"
-      >
+      <li v-for="(comment, idx) in comments" :key="comment.id" class="comment-item">
         <span class="comment-index">{{ idx + 1 }}.</span>
-        <span class="comment-text">{{ comment.text }}</span>
-        <span class="comment-actions">
-          <i class="fas fa-edit"></i> 수정
-          <i class="fas fa-trash" style="margin-left: 10px"></i> 삭제
+        <span class="comment-text">
+          <strong>{{ comment.user }}</strong> : {{ comment.text }}
+          <span style="color:#888; font-size:12px;" v-if="comment.date">({{ comment.date }})</span>
         </span>
       </li>
     </ul>

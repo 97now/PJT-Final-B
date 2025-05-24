@@ -25,6 +25,7 @@ public class Video {
 	private String videoUrl;
 
 	private int videoViewCnt;
+	private int videoLikeCnt;
 
 	@NotBlank(message = "채널명을 입력하세요")
 	private String videoChannelName;

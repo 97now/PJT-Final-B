@@ -10,6 +10,7 @@
         video_part,
         video_url,
         video_view_cnt,
+        video_like_cnt,
         video_channel_name,
         org_img_name,
         unq_img_name
@@ -19,6 +20,7 @@
         #{videoPart},
         #{videoUrl},
         #{videoViewCnt},
+        #{videoLikeCnt},
         #{videoChannelName},
         #{orgImgName},
         #{unqImgName}
@@ -31,7 +33,7 @@
     </select>
 
     <!--비디오 하나 찾아서 보여주기-->
-    <select id="videoSelectOne" resultType="Video" parameterType="int">
+    <select id="videoSelectOne" resultType="Video" parameterType="long">
         SELECT * FROM video
         WHERE video_id=#{videoId}
     </select>
@@ -44,6 +46,7 @@
         video_part = #{videoPart},
         video_url=#{videoUrl},
         video_view_cnt=#{videoViewCnt},
+        video_like_cnt=#{videoLikeCnt},
         video_channel_name=#{videoChannelName},
         org_img_name = #{orgImgName},
         unq_img_name=#{unqImgName}
@@ -51,7 +54,7 @@
     </update>
 
     <!--비디오 삭제-->
-    <delete id="videoDelete" parameterType="int">
+    <delete id="videoDelete" parameterType="long">
         DELETE FROM video
         WHERE video_id=#{videoId}
     </delete>
@@ -68,7 +71,7 @@
     </select>
 
     <!--조회수 증가-->
-    <update id="videoUpdateViewCount" parameterType="int">
+    <update id="videoUpdateViewCount" parameterType="long">
         UPDATE video SET video_view_cnt = video_view_cnt + 1 WHERE video_id = #{videoId}
     </update>
 
