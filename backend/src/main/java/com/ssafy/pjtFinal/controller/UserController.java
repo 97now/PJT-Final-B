@@ -33,14 +33,15 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<User> login(@RequestBody LoginRequest request, HttpSession session) {
         User user = userService.userLogin(request);
 
         if (user == null)
             throw new CustomException(ErrorCode.VALIDATION_FAILED);
 
+        System.out.println(user);
         session.setAttribute("loginUser", user);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(user);
     }
 
     // 로그아웃

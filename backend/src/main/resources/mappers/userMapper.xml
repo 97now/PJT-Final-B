@@ -5,8 +5,8 @@
 <mapper namespace="com.ssafy.pjtFinal.model.dao.UserDao">
     <!--유저 등록-->
     <insert id="userInsert">
-        INSERT INTO user (user_id, user_pw, user_nick_name, user_email, user_phone, created_at)
-        VALUES(#{userId}, #{userPw}, #{userNickName}, #{userEmail}, #{userPhone}, current_timestamp())
+        INSERT INTO user (user_id, user_pw, user_nick_name, user_email, user_phone, user_birth, created_at)
+        VALUES(#{userId}, #{userPw}, #{userNickName}, #{userEmail}, #{userPhone}, #{userBirth}, current_timestamp())
     </insert>
 
     <!--유저 하나 조회-->
