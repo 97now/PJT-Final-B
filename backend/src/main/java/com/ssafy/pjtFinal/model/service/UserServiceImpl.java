@@ -4,6 +4,7 @@ import com.ssafy.pjtFinal.error.CustomException;
 import com.ssafy.pjtFinal.error.ErrorCode;
 import com.ssafy.pjtFinal.model.dao.UserDao;
 import com.ssafy.pjtFinal.model.dto.FindIdRequest;
+import com.ssafy.pjtFinal.model.dto.FindPwRequest;
 import com.ssafy.pjtFinal.model.dto.LoginRequest;
 import com.ssafy.pjtFinal.model.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,13 @@ public class UserServiceImpl implements UserService{
     @Override
     public String findId(FindIdRequest request) {
         return userDao.findId(request);
+    }
+
+    // 비밀번호 찾기
+    @Override
+    public Boolean findPw(FindPwRequest request) {
+        Integer result = userDao.findPw(request);
+        return result != null && result == 1;
     }
 
     // 모든 유저 리스트

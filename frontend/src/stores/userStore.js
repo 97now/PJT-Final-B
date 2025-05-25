@@ -136,6 +136,25 @@ export const useUserStore = defineStore("user", {
     },
 
     // 비밀번호 찾기
+    async findPw(findPwRequest) {
+      console.log(
+        "[userStore.js] 비밀번호 찾기 함수 호출, data = " + findPwRequest
+      );
+
+      try {
+        const response = await api.post(
+          `http://localhost:8080/api/user/findPw`,
+          findPwRequest
+        );
+
+        return response.data;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "비밀번호 찾기 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
 
     // 사용자 정보 수정
     async updateUser(userId, userData) {

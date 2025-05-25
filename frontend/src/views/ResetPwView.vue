@@ -21,7 +21,7 @@
         />
       </div>
 
-      <BaseButton :action="onSubmit" text="확인" />
+      <BaseButton text="확인" />
     </form>
   </div>
 </template>
@@ -29,6 +29,8 @@
 <script setup>
 import BaseInput from "@/components/common/BaseInput.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
+
+console.log(sessionStorage.getItem("resetUserId"));
 
 const onSubmit = () => {
   console.log("비밀번호 재설정 로직 수행해줄거임");

@@ -2,10 +2,7 @@ package com.ssafy.pjtFinal.controller;
 
 import com.ssafy.pjtFinal.error.CustomException;
 import com.ssafy.pjtFinal.error.ErrorCode;
-import com.ssafy.pjtFinal.model.dto.FindIdRequest;
-import com.ssafy.pjtFinal.model.dto.LoginRequest;
-import com.ssafy.pjtFinal.model.dto.LoginResponse;
-import com.ssafy.pjtFinal.model.dto.User;
+import com.ssafy.pjtFinal.model.dto.*;
 import com.ssafy.pjtFinal.model.service.UserService;
 import com.ssafy.pjtFinal.security.JwtUtil;
 import jakarta.servlet.http.HttpSession;
@@ -87,13 +84,19 @@ public class UserController {
     @PostMapping("/findId")
     public ResponseEntity<?> findId(@RequestBody FindIdRequest request){
         System.out.println("[UserController] 아이디 찾기 호출 - " + request);
-
         String userId = userService.findId(request);
-
         if(userId == null)
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
 
         return ResponseEntity.ok(userId);
+    }
+
+    // 비밀번호 찾기
+    @PostMapping("/findPw")
+    public ResponseEntity<?> findPw(@RequestBody FindPwRequest request) {
+        System.out.println("[UserController] 비밀번호 찾기 호출 - " + request.getUserId() + " & " + request.getUserPhone());
+        Boolean isCorrect = userService.findPw(request);
+        return ResponseEntity.ok(isCorrect);
     }
 
     // 유저 수정

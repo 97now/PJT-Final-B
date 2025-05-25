@@ -6,7 +6,7 @@
     <form @submit.prevent="onSubmit">
       <div class="input">
         <label>아이디</label>
-        <BaseInput placeholder="가입한 아이디를 입력하세요" />
+        <BaseInput v-model="userId" placeholder="가입한 아이디를 입력하세요" />
       </div>
       <div class="input">
         <label>전화번호</label>
@@ -18,10 +18,10 @@
             placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
             v-model="userPhone"
           />
-          <button @click.prevent="identify">본인인증</button>
+          <button>본인인증</button>
         </div>
       </div>
-      <BaseButton :action="onSubmit" text="비밀번호 찾기" />
+      <BaseButton text="비밀번호 재설정" />
     </form>
   </div>
 </template>
@@ -29,12 +29,15 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 
 import BaseInput from "@/components/common/BaseInput.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 
 const router = useRouter();
+const userStore = useUserStore();
 
+const userId = ref("");
 const userPhone = ref("");
 
 // 휴대폰 번호에 숫자만 입력되게 제한
@@ -50,11 +53,24 @@ const identify = () => {
   console.log("본인인증해주기.....");
 };
 
-const onSubmit = () => {
-  console.log("비밀번호 찾기 로직 만들어야 됨 // 유저 pk 갖고 가야할 듯?");
-  // 방금 넘어온 정보에 해당하는 유저 존재하면 그 유저의 pk 넘겨주기
-  router.replace({ name: "resetPw" });
-  // 왜 replace 했냐면...뒤로가기 쓸 이유가 없으니까..? 뭔가? 보안상? 더 나을 것 같아서?
+const onSubmit = async () => {
+  try {
+    const findPwRequest = {
+      userId: userId.value,
+      userPhone: userPhone.value,
+    };
+    const result = await userStore.findPw(findPwRequest);
+    if (result) {
+      sessionStorage.setItem("resetUserId", userId.value);
+      alert("인증에 성공했습니다. 비밀번호를 재설정해주세요.");
+      router.push({ name: "resetPw" });
+    } else {
+      alert("입력하신 정보와 일치하는 사용자가 없습니다");
+    }
+  } catch (error) {
+    console.log(error);
+    alert("비밀번호 찾기 중 오류가 발생했습니다.");
+  }
 };
 </script>
 
