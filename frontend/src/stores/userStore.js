@@ -15,6 +15,8 @@ export const useUserStore = defineStore("user", {
     */
     // 아이디 중복 확인
     async checkDuplicatedId(userId) {
+      console.log("[userStore.js] 아이디 중복 확인 함수 호출");
+
       try {
         const response = await api.get(
           `http://localhost:8080/api/user/${userId}`
@@ -110,6 +112,30 @@ export const useUserStore = defineStore("user", {
         throw error;
       }
     },
+
+    // 아이디 찾기
+    async findId(findIdData) {
+      console.log(
+        "[userStore.js] 아이디 찾기 함수 호출, data = " +
+          JSON.stringify(findIdData)
+      );
+
+      try {
+        const response = await api.post(
+          `http://localhost:8080/api/user/findId`,
+          findIdData
+        );
+
+        return response.data;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "아이디 찾기 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
+    // 비밀번호 찾기
 
     // 사용자 정보 수정
     async updateUser(userId, userData) {

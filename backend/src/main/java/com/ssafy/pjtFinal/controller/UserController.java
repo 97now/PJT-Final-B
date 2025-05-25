@@ -2,6 +2,7 @@ package com.ssafy.pjtFinal.controller;
 
 import com.ssafy.pjtFinal.error.CustomException;
 import com.ssafy.pjtFinal.error.ErrorCode;
+import com.ssafy.pjtFinal.model.dto.FindIdRequest;
 import com.ssafy.pjtFinal.model.dto.LoginRequest;
 import com.ssafy.pjtFinal.model.dto.LoginResponse;
 import com.ssafy.pjtFinal.model.dto.User;
@@ -9,6 +10,7 @@ import com.ssafy.pjtFinal.model.service.UserService;
 import com.ssafy.pjtFinal.security.JwtUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -64,6 +66,7 @@ public class UserController {
     // 유저 조회 (단일)
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUser(@PathVariable String userId) {
+        System.out.println("[UserController] 유저 조회 진입");
         User user = userService.getUserOne(userId);
 
         if(user == null)
@@ -78,6 +81,19 @@ public class UserController {
         List<User> users = userService.getUserAll();
 
         return users.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(users);
+    }
+
+    // 아이디 찾기
+    @PostMapping("/findId")
+    public ResponseEntity<?> findId(@RequestBody FindIdRequest request){
+        System.out.println("[UserController] 아이디 찾기 호출 - " + request);
+
+        String userId = userService.findId(request);
+
+        if(userId == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        return ResponseEntity.ok(userId);
     }
 
     // 유저 수정

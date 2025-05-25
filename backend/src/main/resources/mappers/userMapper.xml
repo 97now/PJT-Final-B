@@ -15,6 +15,17 @@
         WHERE user_id=#{userId}
     </select>
 
+    <!--아이디 찾기 -->
+    <select id="findId" parameterType="FindIdRequest" resultType="String">
+        SELECT user_id FROM user
+        <if test="findBy == 'email'">
+            WHERE user_nick_name = #{userNickName} and user_email = #{userData}
+        </if>
+        <if test="findBy == 'phone'">
+            WHERE user_nick_name = #{userNickName} and user_phone = #{userData}
+        </if>
+    </select>
+
     <!--유저 전체 조회-->
     <select id="userSelectAll" resultType="User">
         SELECT * FROM user
@@ -23,7 +34,8 @@
     <!--유저 수정-->
     <update id="userUpdate" parameterType="User">
         UPDATE user SET
-        user_id=#{userId},user_pw=#{userPw},user_nick_name=#{userNickName},user_email=#{userEmail}, user_phone=#{userPhone}
+        user_id=#{userId},user_pw=#{userPw},user_nick_name=#{userNickName},user_email=#{userEmail},
+        user_phone=#{userPhone}
         WHERE user_id=#{userId}
     </update>
 

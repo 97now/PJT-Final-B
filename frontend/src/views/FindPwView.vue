@@ -11,7 +11,13 @@
       <div class="input">
         <label>전화번호</label>
         <div class="phoneInput">
-          <BaseInput placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)" />
+          <BaseInput
+            @input="restrictPhoneInput"
+            type="text"
+            id="phone"
+            placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
+            v-model="userPhone"
+          />
           <button @click.prevent="identify">본인인증</button>
         </div>
       </div>
@@ -21,12 +27,24 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 import BaseInput from "@/components/common/BaseInput.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 
 const router = useRouter();
+
+const userPhone = ref("");
+
+// 휴대폰 번호에 숫자만 입력되게 제한
+const restrictPhoneInput = (event) => {
+  const input = event.target.value;
+  // 숫자가 아닌 문자 제거
+  const numbersOnly = input.replace(/[^0-9]/g, "");
+  // 11자리로 제한
+  userPhone.value = numbersOnly.slice(0, 11);
+};
 
 const identify = () => {
   console.log("본인인증해주기.....");
