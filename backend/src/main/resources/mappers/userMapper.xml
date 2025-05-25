@@ -29,8 +29,16 @@
     <!--비밀번호 찾기-->
     <select id="findPw" parameterType="FindPwRequest" resultType="Integer">
         SELECT 1 FROM user
+
         WHERE user_id = #{userId} and user_phone = #{userPhone}
     </select>
+
+    <!--비밀번호 재설정-->
+    <update id="resetPw" parameterType="ResetPwRequest">
+        UPDATE user
+        SET user_pw = #{newPw}
+        WHERE user_id = #{userId}
+    </update>
 
     <!--유저 전체 조회-->
     <select id="userSelectAll" resultType="User">

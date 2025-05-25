@@ -99,6 +99,16 @@ public class UserController {
         return ResponseEntity.ok(isCorrect);
     }
 
+    // 비밀번호 재설정
+    @PostMapping("/resetPw")
+    public ResponseEntity<?> resetPw(@RequestBody ResetPwRequest request) {
+        User user = userService.getUserOne(request.getUserId());
+        if(user == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        userService.resetPw(request);
+        return ResponseEntity.ok().build();
+    }
+
     // 유저 수정
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable String userId, @Valid @RequestBody User user) {

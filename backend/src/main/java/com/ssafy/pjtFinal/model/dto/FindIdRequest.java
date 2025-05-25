@@ -3,7 +3,6 @@ package com.ssafy.pjtFinal.model.dto;
 import lombok.*;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

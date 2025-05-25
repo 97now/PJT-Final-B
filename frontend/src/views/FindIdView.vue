@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
 import BaseInput from "@/components/common/BaseInput.vue";
@@ -89,6 +89,7 @@ import BaseButton from "@/components/common/BaseButton.vue";
 import EmailDomainDropbox from "@/components/common/EmailDomainDropbox.vue";
 
 const userStore = useUserStore();
+const router = useRouter();
 
 const findBy = ref("전화번호");
 
@@ -169,6 +170,7 @@ const onSubmit = async () => {
   try {
     const result = await userStore.findId(findIdData);
     alert(`회원님의 아이디는 ${result} 입니다`);
+    router.push({ name: "logIn" });
   } catch (err) {
     console.log(err);
     alert("아이디 찾기 중 오류가 발생했습니다.");

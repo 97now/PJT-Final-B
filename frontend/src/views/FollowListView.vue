@@ -1,11 +1,14 @@
 <template>
   <div>
     <FollowListItem
+      v-if="list.length !== 0"
       v-for="f in list"
       :key="f.userId"
       :user="f"
       @update-following-cnt="updateFollowingCnt"
     />
+    <p v-else-if="relation === 'following'">팔로잉 목록이 없습니다</p>
+    <p v-else-if="relation === 'follower'">팔로워 목록이 없습니다</p>
   </div>
 </template>
 
@@ -50,4 +53,10 @@ const list = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+p {
+  padding: 20px;
+  text-align: center;
+  font-size: 20px;
+}
+</style>

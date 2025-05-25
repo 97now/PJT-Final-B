@@ -138,7 +138,8 @@ export const useUserStore = defineStore("user", {
     // 비밀번호 찾기
     async findPw(findPwRequest) {
       console.log(
-        "[userStore.js] 비밀번호 찾기 함수 호출, data = " + findPwRequest
+        "[userStore.js] 비밀번호 찾기 함수 호출, data = " +
+          JSON.stringify(findPwRequest)
       );
 
       try {
@@ -152,6 +153,26 @@ export const useUserStore = defineStore("user", {
         this.error =
           error.response?.data?.message ||
           "비밀번호 찾기 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
+    // 비밀번호 재설정
+    async resetPw(resetPwRequest) {
+      console.log(
+        "[userStore.js] 비밀번호 재설정 함수 호출, data = " +
+          JSON.stringify(resetPwRequest)
+      );
+
+      try {
+        await api.post(
+          `http://localhost:8080/api/user/resetPw`,
+          resetPwRequest
+        );
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "비밀번호 재설정 중 오류가 발생했습니다.";
         throw error;
       }
     },

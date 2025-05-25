@@ -2,6 +2,7 @@ package com.ssafy.pjtFinal.model.dao;
 
 import com.ssafy.pjtFinal.model.dto.FindIdRequest;
 import com.ssafy.pjtFinal.model.dto.FindPwRequest;
+import com.ssafy.pjtFinal.model.dto.ResetPwRequest;
 import com.ssafy.pjtFinal.model.dto.User;
 import org.apache.ibatis.annotations.Param;
 
@@ -15,4 +16,6 @@ public interface UserDao {
     void userUpdate(User user);
     void userDelete(String userId);
     Integer findPw(FindPwRequest request);
+
+    void resetPw(ResetPwRequest request);
 }
