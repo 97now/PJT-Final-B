@@ -40,4 +40,5 @@ public class User {
     private int followerCnt;
     private int followingCnt;
 
+    private boolean checkFollowed;
 }

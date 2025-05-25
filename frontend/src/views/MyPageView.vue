@@ -1,5 +1,5 @@
 <template>
-  <div class="my-page-view">
+  <div class="my-page-view" v-if="user">
     <div class="myInfo">
       <ProfilePicture
         :img="imgUrl"
@@ -31,27 +31,43 @@
 
     <!-- 화면 전환 -->
     <LikeVideoView v-if="currentView === 'default'" />
-    <FollowListView v-else :relation="currentView" />
+    <FollowListView
+      v-else
+      :relation="currentView"
+      @update-following-cnt="onUpdateFollowingCnt"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
-import SearchBar from "@/components/common/SearchBar.vue";
 
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
-const { user } = storeToRefs(userStore);
+const { userId } = storeToRefs(userStore);
 
+const user = ref(null);
 const imgUrl = ref("/User.png");
+
+onMounted(async () => {
+  user.value = await userStore.fetchUserInfo(userId.value);
+  console.log("로그인된 유저 : " + userId.value);
+  console.log(user.value);
+});
+
+const onUpdateFollowingCnt = (change) => {
+  console.log("[MyPageView] onUpdateUserInfo 호출");
+  user.value.followingCnt += change;
+  console.log(user.value);
+};
 
 const currentView = computed(() => {
   const relation = route.params.relation;
@@ -59,15 +75,15 @@ const currentView = computed(() => {
 });
 
 function goToDefault() {
-  router.push(`/${user.value.userId}/myPage`);
+  router.push(`/${userId.value}/myPage`);
 }
 
 function goToFollowing() {
-  router.push(`/${user.value.userId}/myPage/follow-list/following`);
+  router.push(`/${userId.value}/myPage/follow-list/following`);
 }
 
 function goToFollower() {
-  router.push(`/${user.value.userId}/myPage/follow-list/follower`);
+  router.push(`/${userId.value}/myPage/follow-list/follower`);
 }
 </script>
 

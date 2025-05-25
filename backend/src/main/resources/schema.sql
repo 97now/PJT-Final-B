@@ -14,7 +14,7 @@ CREATE TABLE user
     user_phone     VARCHAR(20),
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     follower_cnt   int      DEFAULT 0,
-    followee_cnt   int      DEFAULT 0
+    following_cnt   int      DEFAULT 0
 );
 
 -- 비디오 테이블
@@ -63,6 +63,7 @@ CREATE TABLE follow
     follower    VARCHAR(50) NOT NULL,
     followee    VARCHAR(50) NOT NULL,
     followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_follow UNIQUE (follower, followee)
     CONSTRAINT fk_follow_follower FOREIGN KEY (follower) REFERENCES user (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_follow_followee FOREIGN KEY (followee) REFERENCES user (user_id) ON DELETE CASCADE
 );

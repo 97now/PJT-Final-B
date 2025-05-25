@@ -3,13 +3,13 @@
     <ProfilePicture :img="imgUrl" alt="sadas" />
     <div class="userInfo">
       <p>
-        <strong>{{ user.id }}</strong>
+        <strong>{{ user.userNickName }}</strong>
       </p>
-      <p>{{ user.statusMsg }}</p>
+      <p>{{ user.userId }}</p>
     </div>
     <FollowButton
       :value="user.isFollowed ? 'Following' : 'Follow'"
-      :is-followed="user.isFollowed"
+      :is-followed="user.checkFollowed"
       @toggle-follow="onToggleFollow(user)"
     />
   </div>
@@ -19,17 +19,30 @@
 import { ref } from "vue";
 import ProfilePicture from "../common/ProfilePicture.vue";
 import FollowButton from "../common/FollowButton.vue";
+import { useUserStore } from "@/stores/userStore";
+
+const userStore = useUserStore();
 
 const imgUrl = ref("/User.png");
 const prop = defineProps({
   user: Object,
 });
+const emit = defineEmits(["updateFollowingCnt"]);
 
 const onToggleFollow = (user) => {
   console.log(
-    "지금은 버튼만 바뀌는데 나중에 실제 팔로우 데이터에서 추가하고 삭제하는 로직 구현해야 함"
+    "[FollowListItem] onToggleFollow 호출, targetId = " + user.userId
   );
-  user.isFollowed = !user.isFollowed;
+
+  if (!user.checkFollowed) {
+    userStore.followUser(user.userId);
+    emit("updateFollowingCnt", 1);
+  } else {
+    userStore.unfollowUser(user.userId);
+    emit("updateFollowingCnt", -1);
+  }
+
+  user.checkFollowed = !user.checkFollowed;
 };
 </script>
 

@@ -1,21 +1,13 @@
 import { defineStore } from "pinia";
-import axios from "axios";
+import api from "@/api/axiosInstance";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: null,
+    token: null,
+    userId: null,
     isLoggedIn: false,
     error: null,
-    followingList: [],
-    followerList: [],
-    isFollowed: false,
   }),
-
-  getters: {
-    getUser: (state) => state.user,
-    getIsLoggedIn: (state) => state.isLoggedIn,
-    getError: (state) => state.error,
-  },
 
   actions: {
     /*
@@ -24,7 +16,7 @@ export const useUserStore = defineStore("user", {
     // 아이디 중복 확인
     async checkDuplicatedId(userId) {
       try {
-        const response = await axios.get(
+        const response = await api.get(
           `http://localhost:8080/api/user/${userId}`
         );
         return {
@@ -45,7 +37,7 @@ export const useUserStore = defineStore("user", {
     // 회원가입
     async register(userData) {
       try {
-        const response = await axios.post(
+        const response = await api.post(
           "http://localhost:8080/api/user",
           userData
         );
@@ -61,14 +53,14 @@ export const useUserStore = defineStore("user", {
     // 로그인
     async login(loginData) {
       try {
-        const response = await axios.post(
+        const response = await api.post(
           "http://localhost:8080/api/user/login",
           loginData
         );
-        this.isLoggedIn = true;
-        this.user = response.data;
 
-        console.log(this.user);
+        this.token = response.data.token;
+        this.isLoggedIn = true;
+        this.userId = response.data.userId;
       } catch (error) {
         const msg =
           error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
@@ -80,9 +72,9 @@ export const useUserStore = defineStore("user", {
     // 로그아웃
     async logout() {
       try {
-        await axios.get("http://localhost:8080/api/user/logout");
-        this.user = null;
+        this.userId = null;
         this.isLoggedIn = false;
+        this.token = null;
       } catch (error) {
         this.error =
           error.response?.data?.message || "로그아웃 중 오류가 발생했습니다.";
@@ -92,11 +84,15 @@ export const useUserStore = defineStore("user", {
 
     // 사용자 정보 조회
     async fetchUserInfo(userId) {
+      console.log("[userStore.js] 사용자 정보 조회 함수 호출");
+
       try {
-        const response = await axios.get(
+        const response = await api.get(
           `http://localhost:8080/api/user/${userId}`
         );
-        this.user = response.data;
+
+        console.log(response.data);
+        return response.data;
       } catch (error) {
         this.error =
           error.response?.data?.message ||
@@ -108,11 +104,11 @@ export const useUserStore = defineStore("user", {
     // 사용자 정보 수정
     async updateUser(userId, userData) {
       try {
-        const response = await axios.put(
+        const response = await api.put(
           `http://localhost:8080/api/user/${userId}`,
           userData
         );
-        this.user = response.data;
+
         return response.data;
       } catch (error) {
         this.error =
@@ -125,9 +121,14 @@ export const useUserStore = defineStore("user", {
     // 사용자 삭제
     async deleteUser(userId) {
       try {
-        await axios.delete(`http://localhost:8080/api/user/${userId}`);
-        this.user = null;
+        const response = await api.delete(
+          `http://localhost:8080/api/user/${userId}`
+        );
+        this.userId = null;
         this.isLoggedIn = false;
+        this.token = null;
+
+        return response.data;
       } catch (error) {
         this.error =
           error.response?.data?.message ||
@@ -141,42 +142,48 @@ export const useUserStore = defineStore("user", {
     */
     // 내가 팔로잉하는 목록
     async fetchFollowingList(userId) {
+      console.log(
+        "[userStore.js] fetchFollowingList 호출 / 현재 토큰 : " + this.token
+      );
+
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/follow/${userId}/following`
+        const response = await api.get(
+          `http://localhost:8080/api/follow/following`
         );
-        this.followingList = response.data || [];
+
+        return response.data;
       } catch (error) {
         this.error =
           error.response?.data?.message ||
           "팔로잉 목록 조회 중 오류가 발생했습니다.";
-        this.followingList = [];
       }
     },
 
     // 나를 팔로우하는 목록
     async fetchFollowerList(userId) {
+      console.log(
+        "[userStore.js] fetchFollowerList 호출 / 현재 토큰 : " + this.token
+      );
+
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/follow/${userId}/follower`
+        const response = await api.get(
+          `http://localhost:8080/api/follow/follower`
         );
-        this.followerList = response.data || [];
+
+        return response.data;
       } catch (error) {
         this.error =
           error.response?.data?.message ||
           "팔로워 목록 조회 중 오류가 발생했습니다.";
-        this.followerList = [];
       }
     },
 
     // 팔로우 추가
     async followUser(targetId) {
       try {
-        await axios.post(`http://localhost:8080/api/follow`, {
-          follower: this.user.userId,
+        await api.post(`http://localhost:8080/api/follow/${targetId}`, {
           followee: targetId,
         });
-        this.isFollowed = true;
       } catch (error) {
         this.error =
           error.response?.data?.message || "팔로우 중 오류가 발생했습니다.";
@@ -187,8 +194,7 @@ export const useUserStore = defineStore("user", {
     // 언팔로우
     async unfollowUser(targetId) {
       try {
-        await axios.delete(`http://localhost:8080/api/follow/${targetId}`);
-        this.isFollowed = false;
+        await api.delete(`http://localhost:8080/api/follow/${targetId}`);
       } catch (error) {
         this.error =
           error.response?.data?.message || "언팔로우 중 오류가 발생했습니다.";
@@ -199,15 +205,15 @@ export const useUserStore = defineStore("user", {
     // 팔로우 여부 체크
     async checkFollowed(targetId) {
       try {
-        const response = await axios.get(
+        const response = await api.get(
           `http://localhost:8080/api/follow/${targetId}/check`
         );
-        this.isFollowed = response.data;
+
+        return response.data;
       } catch (error) {
         this.error =
           error.response?.data?.message ||
           "팔로우 여부 확인 중 오류가 발생했습니다.";
-        this.isFollowed = false;
       }
     },
 
@@ -217,5 +223,8 @@ export const useUserStore = defineStore("user", {
     },
   },
 
-  persist: true,
+  persist: {
+    paths: ["token", "userId", "isLoggedIn"],
+    storage: localStorage,
+  },
 });

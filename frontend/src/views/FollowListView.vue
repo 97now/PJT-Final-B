@@ -1,32 +1,46 @@
 <template>
   <div>
-    <FollowListItem v-for="f in list" :key="f.userId" :user="f" />
+    <FollowListItem
+      v-for="f in list"
+      :key="f.userId"
+      :user="f"
+      @update-following-cnt="updateFollowingCnt"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import FollowListItem from "@/components/user/FollowListItem.vue";
-import { storeToRefs } from "pinia";
+
+const emit = defineEmits(["updateFollowingCnt"]);
 
 const userStore = useUserStore();
 const route = useRoute();
 const relation = computed(() => route.params.relation);
 
-const { followerList, followingList } = storeToRefs(userStore);
+const followingList = ref([]);
+const followerList = ref([]);
 
-onMounted(() => {
-  const userId = userStore.user?.userId;
+onMounted(async () => {
+  const userId = userStore.userId;
   if (userId) {
-    userStore.fetchFollowingList(userId);
-    userStore.fetchFollowerList(userId);
+    followingList.value = await userStore.fetchFollowingList(userId);
+    followerList.value = await userStore.fetchFollowerList(userId);
   }
 });
 
+const updateFollowingCnt = (change) => {
+  console.log("[FollowListView] updateUserInfo 호출");
+  emit("updateFollowingCnt", change);
+};
+
 const list = computed(() => {
-  return relation.value === "follower" ? followerList : followingList;
+  return relation.value === "follower"
+    ? followerList.value
+    : followingList.value;
 });
 </script>
 
