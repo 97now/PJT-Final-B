@@ -2,42 +2,41 @@
   <router-link :to="`/video/${video.id}`" class="video-card-link">
     <div class="video-card">
       <div class="video-thumb">
-        <img
-          :src="getYoutubeThumbnail(video.url)"
-          alt="썸네일"
-          class="thumb"
-        />
+        <img :src="getYoutubeThumbnail(video.url)" alt="썸네일" class="thumb" />
       </div>
       <div class="video-info">
         <span class="video-title">{{ video.title }}</span>
         <span class="video-meta">
-          <img :src="eyeIcon" alt="조회수" class="icon" />{{ video.views }}&nbsp;
-          <img :src="heartIcon" alt="좋아요" class="icon" />{{ video.likes }}
+          <img :src="eyeIcon" alt="조회수" class="icon" />{{
+            video.views
+          }}&nbsp; <img :src="heartIcon" alt="좋아요" class="icon" />{{
+            video.likes
+          }}
         </span>
       </div>
     </div>
   </router-link>
 </template>
 <script setup>
-import eyeIcon from '@/assets/img/Eye.png'
-import heartIcon from '@/assets/img/Heart.png'
+import eyeIcon from "@/assets/img/Eye.png";
+import heartIcon from "@/assets/img/Heart.png";
 // import videoCallIcon from '@/assets/img/Video_Call.png'
-const props = defineProps({ video: Object })
+const props = defineProps({ video: Object });
 
 function getYoutubeThumbnail(url) {
-  if (!url) return '';
-  const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+  if (!url) return "";
+  const regExp =
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
   const match = url.match(regExp);
   return match && match[1]
     ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`
-    : '';
+    : "";
 }
-
 </script>
 
 <style scoped>
 .video-card {
-  flex: 0 1 calc(50% - 15px);  /* 2열로 배치, gap 고려 */
+  flex: 0 1 calc(50% - 15px); /* 2열로 배치, gap 고려 */
   box-sizing: border-box;
   background: #eee;
   border-radius: 15px;
@@ -78,7 +77,7 @@ function getYoutubeThumbnail(url) {
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  min-width: 0;  /* 텍스트 오버플로우를 위해 필요 */
+  min-width: 0; /* 텍스트 오버플로우를 위해 필요 */
 }
 
 .video-meta {
@@ -87,7 +86,7 @@ function getYoutubeThumbnail(url) {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex-shrink: 0;  /* 메타 정보는 줄어들지 않도록 */
+  flex-shrink: 0; /* 메타 정보는 줄어들지 않도록 */
 }
 
 .icon {

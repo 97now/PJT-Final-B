@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, inject } from "vue";
-import axios from "axios";
+import api from "@/api/axiosInstance";
 import VideoList from "@/components/common/VideoList.vue";
 import { useUserStore } from "@/stores/userStore";
 import { useRoute } from "vue-router";
@@ -8,7 +8,7 @@ import { useRoute } from "vue-router";
 // 사용자 정보
 const userStore = useUserStore();
 const route = useRoute();
-const userId = computed(() => userStore.user.userId);
+const userId = computed(() => userStore.userId);
 
 // 영상 데이터
 const videos = ref([]);
@@ -20,8 +20,8 @@ const currentIndex = ref(0);
 // 좋아요한 영상 목록 불러오기
 async function fetchLikedVideos() {
   try {
-    const res = await axios.get(`/api/video-like/user/${userId.value}`);
-    videos.value = res.data.map(v => ({
+    const res = await api.get(`/api/video-like/user/${userId.value}`);
+    videos.value = res.data.map((v) => ({
       id: v.videoId,
       title: v.videoTitle,
       category: v.videoPart,
@@ -42,9 +42,9 @@ onMounted(() => {
 });
 
 // 이벤트 버스(옵션): 좋아요 상태 변경 시 목록 갱신
-const eventBus = inject('eventBus');
+const eventBus = inject("eventBus");
 if (eventBus) {
-  eventBus.on('videoLikeChanged', () => {
+  eventBus.on("videoLikeChanged", () => {
     fetchLikedVideos();
   });
 }
@@ -71,10 +71,17 @@ const filteredVideos = computed(() => {
   result = [...result].sort((a, b) => b[sortType.value] - a[sortType.value]);
   return result;
 });
-watch(filteredVideos, () => { currentIndex.value = 0; });
+watch(filteredVideos, () => {
+  currentIndex.value = 0;
+});
 
-function prevVideo() { if (currentIndex.value > 0) currentIndex.value--; }
-function nextVideo() { if (currentIndex.value < filteredVideos.value.length - 1) currentIndex.value++; }
+function prevVideo() {
+  if (currentIndex.value > 0) currentIndex.value--;
+}
+function nextVideo() {
+  if (currentIndex.value < filteredVideos.value.length - 1)
+    currentIndex.value++;
+}
 </script>
 
 <template>
@@ -85,7 +92,9 @@ function nextVideo() { if (currentIndex.value < filteredVideos.value.length - 1)
         @click="prevVideo"
         :disabled="currentIndex === 0"
         :class="{ invisible: currentIndex === 0 }"
-      >◀</button>
+      >
+        ◀
+      </button>
       <div class="video-center">
         <VideoList :videos="[filteredVideos[currentIndex]]" />
       </div>
@@ -94,9 +103,11 @@ function nextVideo() { if (currentIndex.value < filteredVideos.value.length - 1)
         @click="nextVideo"
         :disabled="currentIndex === filteredVideos.length - 1"
         :class="{ invisible: currentIndex === filteredVideos.length - 1 }"
-      >▶</button>
+      >
+        ▶
+      </button>
     </div>
-    <div v-else style="margin-top: 40px; text-align: center; color: #888;">
+    <div v-else style="margin-top: 40px; text-align: center; color: #888">
       좋아요한 영상이 없습니다.
     </div>
   </div>

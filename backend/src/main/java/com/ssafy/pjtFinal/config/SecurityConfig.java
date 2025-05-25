@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable()) // REST API는 CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/api/user/**", "/api/video").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable()) // 로그인 form 끄기

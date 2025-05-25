@@ -5,9 +5,6 @@
     </header>
 
     <main class="mainapp">
-      <router-link :to="{ name: 'video-detail', params: { videoId: 1 } }">
-        상세 페이지 예시
-      </router-link> -->
       <router-view></router-view>
     </main>
 

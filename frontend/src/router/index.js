@@ -67,8 +67,11 @@ const routes = [
     component: VideoDetailView,
     meta: { requiresAuth: true },
   },
-  { path: '/video/:id', 
-    component: VideoDetailView },
+  {
+    path: "/video/:id",
+    component: VideoDetailView,
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
@@ -81,6 +84,7 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = userStore.isLoggedIn;
 
   if (to.meta.requiresAuth && !isLoggedIn) {
+    alert("로그인이 필요한 서비스입니다");
     next("/login");
   } else {
     next();

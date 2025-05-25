@@ -17,7 +17,7 @@
     </nav>
     <nav v-else class="header-actions">
       <img :src="logoutIcon" alt="signup" class="icon" />
-      <router-link to="/" @click="logOut" class="header-link"
+      <router-link to="/" @click="logout" class="header-link"
         >logout</router-link
       >
       <img :src="userIcon" alt="signup" class="icon" />
