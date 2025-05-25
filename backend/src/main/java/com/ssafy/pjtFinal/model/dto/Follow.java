@@ -14,4 +14,5 @@ public class Follow {
     private String followee;    // 팔로우 누른 유저아이디
     private String follower;    // 팔로우 대상 유저 아이디
     private LocalDateTime followedAt; // 팔로우한 시간
+
 }

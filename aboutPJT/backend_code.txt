@@ -1,0 +1,681 @@
+// PjtFinalApplication.java
+package com.ssafy.pjtFinal;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PjtFinalApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(PjtFinalApplication.class, args);
+	}
+}
+
+// UserDao.java
+package com.ssafy.pjtFinal.model.dao;
+
+import com.ssafy.pjtFinal.model.dto.User;
+
+import java.util.List;
+
+public interface UserDao {
+    void userInsert(User user);
+    User userSelectOne(String userId);
+    List<User> userSelectAll();
+    void userUpdate(User user);
+    void userDelete(String userId);
+}
+
+// UserService.java
+package com.ssafy.pjtFinal.model.service;
+
+import com.ssafy.pjtFinal.model.dto.LoginRequest;
+import com.ssafy.pjtFinal.model.dto.User;
+
+import java.util.List;
+
+public interface UserService {
+    // 유저 등록
+    void userAdd(User user);
+    // 로그인
+    User userLogin(LoginRequest request);
+    // 유저 하나
+    User getUserOne(String userId);
+    // 유저 모두
+    List<User> getUserAll();
+    // 유저 수정
+    void userModify(User user);
+    // 유저 삭제
+    void userRemove(String userId);
+}
+
+// UserServiceImpl.java
+package com.ssafy.pjtFinal.model.service;
+
+import com.ssafy.pjtFinal.error.CustomException;
+import com.ssafy.pjtFinal.error.ErrorCode;
+import com.ssafy.pjtFinal.model.dao.UserDao;
+import com.ssafy.pjtFinal.model.dto.LoginRequest;
+import com.ssafy.pjtFinal.model.dto.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class UserServiceImpl implements UserService{
+
+    private final PasswordEncoder passwordEncoder;
+    // 의존성 주입
+    UserDao userDao;
+    @Autowired
+    public UserServiceImpl(UserDao userDao, PasswordEncoder passwordEncoder) {
+        this.userDao = userDao;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    // 회원가입
+    @Override
+    @Transactional
+    public void userAdd(User user) {
+        String encodedPw = passwordEncoder.encode(user.getUserPw());
+        user.setUserPw(encodedPw);
+
+        if(userDao.userSelectOne(user.getUserId()) != null)
+                throw new CustomException(ErrorCode.DUPLICATE_USER_ID);
+        userDao.userInsert(user);
+    }
+
+    // 로그인
+    @Override
+    public User userLogin(LoginRequest request) {
+        User user = getUserOne(request.getUserId());
+
+        if(user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        if(!passwordEncoder.matches(request.getUserPw(), user.getUserPw())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        return user;
+    }
+
+    // 유저 한 명 선택
+    @Override
+    public User getUserOne(String userId) {
+        return userDao.userSelectOne(userId);
+    }
+
+    // 모든 유저 리스트
+    @Override
+    public List<User> getUserAll() {
+        return userDao.userSelectAll();
+    }
+
+    // 회원 정보 수정
+    @Override
+    @Transactional
+    public void userModify(User user) {
+        String encodedPw = passwordEncoder.encode(user.getUserPw());
+        user.setUserPw(encodedPw);
+        userDao.userUpdate(user);
+    }
+
+    // 회원 정보 삭제
+    @Override
+    @Transactional
+    public void userRemove(String userId) {
+        userDao.userDelete(userId);
+    }
+}
+
+// UserController.java
+package com.ssafy.pjtFinal.controller;
+
+import com.ssafy.pjtFinal.error.CustomException;
+import com.ssafy.pjtFinal.error.ErrorCode;
+import com.ssafy.pjtFinal.model.dto.LoginRequest;
+import com.ssafy.pjtFinal.model.dto.User;
+import com.ssafy.pjtFinal.model.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/user")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    // 유저 등록
+    @PostMapping
+    public ResponseEntity<User> registUser(@Valid @RequestBody User user) {
+        userService.userAdd(user);
+        URI location = URI.create("/api/user/" + user.getUserId());
+        return ResponseEntity.created(location).body(user);
+    }
+
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody LoginRequest request, HttpSession session) {
+        User user = userService.userLogin(request);
+
+        if (user == null)
+            throw new CustomException(ErrorCode.VALIDATION_FAILED);
+
+        session.setAttribute("loginUser", user);
+        session.setMaxInactiveInterval(30 * 60); // 30분
+        
+        return ResponseEntity.ok(user);
+    }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession session) {
+        User user = (User) session.getAttribute("loginUser");
+
+        if(user == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        session.removeAttribute("loginUser");
+        return ResponseEntity.noContent().build();
+    }
+
+    // 유저 조회 (단일)
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUser(@PathVariable String userId, HttpSession session) {
+        User user = userService.getUserOne(userId);
+
+        if(user == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        return ResponseEntity.ok(user);
+    }
+
+    // 유저 조회 (전체)
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getUserAll();
+
+        return users.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(users);
+    }
+
+    // 유저 수정
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updateUser(@PathVariable String userId, @Valid @RequestBody User user) {
+        User requestUser = userService.getUserOne(userId);
+
+        if(requestUser == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        user.setUserId(userId);
+        userService.userModify(user);
+        return ResponseEntity.ok(user);
+    }
+
+    // 유저 삭제
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+        User user = userService.getUserOne(userId);
+
+        if(user == null)
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+
+        userService.userRemove(userId);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+// ErrorCode.java
+package com.ssafy.pjtFinal.error;
+
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public enum ErrorCode {
+    // 공통 에러
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다."),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력 형식이 올바르지 않습니다"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 알 수 없는 오류가 발생했습니다."),
+    NO_CONTENT(HttpStatus.NO_CONTENT, "콘텐츠가 비어있습니다"),
+
+    // 유저 관련
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요한 서비스입니다"),
+    DUPLICATE_USER_ID(HttpStatus.BAD_REQUEST, "이미 가입된 아이디입니다"),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다"),
+
+    // 팔로우 관련
+    NO_FOLLOWING(HttpStatus.OK, "팔로잉한 유저가 없습니다"),
+    NO_FOLLOWER(HttpStatus.OK, "나를 팔로우한 유저가 없습니다"),
+    ALREADY_FOLLOWED(HttpStatus.CONFLICT, "이미 팔로우한 유저입니다"),
+
+    // 좋아요 관련
+    NO_LIKE(HttpStatus.OK, "좋아요 한 영상이 없습니다"),
+    ALREADY_LIKED(HttpStatus.CONFLICT, "이미 좋아요 한 영상입니다");
+
+    private final HttpStatus status;
+    private final String message;
+
+    ErrorCode(HttpStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+}
+
+// CustomException.java
+package com.ssafy.pjtFinal.error;
+
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public class CustomException extends RuntimeException {
+    private final ErrorCode errorCode;
+
+    public CustomException(ErrorCode errorCode) {
+        super(errorCode.getMessage());  // RuntimeException의 message에 넣어줌
+        this.errorCode = errorCode;
+    }
+
+    public HttpStatus getStatus() {
+        return errorCode.getStatus();
+    }
+}
+
+// ValidationExceptionHandler.java
+package com.ssafy.pjtFinal.error;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import com.ssafy.pjtFinal.model.dto.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class ValidationExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation failed", errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e){
+        ErrorResponse errorResponse = new ErrorResponse(
+                e.getStatus().value(),
+                e.getMessage(),
+                null    // validation 에러는 아니라서 errors는 null
+        );
+
+        return ResponseEntity.status(e.getStatus()).body(errorResponse);
+    }
+}
+
+// SecurityConfig.java
+package com.ssafy.pjtFinal.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+@Configuration
+public class SecurityConfig {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // REST API는 CSRF 비활성화
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+
+                .formLogin(form -> form.disable()) // 로그인 form 끄기
+                .httpBasic(basic -> basic.disable()) // HTTP Basic 끄기
+                .sessionManagement(session -> session
+                        .maximumSessions(1) // 세션 하나만 유지
+                        .maxSessionsPreventsLogin(false) // 기존 세션이 있으면 로그인 실패
+                        .expiredUrl("/api/user/login") // 세션 만료시 리다이렉트
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // 세션 항상 생성
+                );
+
+        return http.build();
+    }
+}
+
+// WebConfig.java
+package com.ssafy.pjtFinal.config;
+
+import com.ssafy.pjtFinal.interceptor.SessionInterceptor;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@MapperScan(basePackages = "com.ssafy.pjtFinal.model.dao")
+public class WebConfig implements WebMvcConfigurer {
+    // interceptor 의존성 주입
+    private SessionInterceptor sessionInterceptor;
+    @Autowired
+    public WebConfig(SessionInterceptor sessionInterceptor) {
+        this.sessionInterceptor = sessionInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(sessionInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                        "/api/user",         // POST 회원가입
+                        "/api/user/",        // 혹시 슬래시 붙은 경우도 포함
+                        "/api/user/**",      // 단건조회, 리스트 조회 등
+                        "/api/user/login"    // 로그인
+                );
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true);
+    }
+}
+
+// SessionInterceptor.java
+package com.ssafy.pjtFinal.interceptor;
+
+import com.ssafy.pjtFinal.error.ErrorCode;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Component;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+@Component
+public class SessionInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        return true;
+    }
+}
+
+// Review.java
+package com.ssafy.pjtFinal.model.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class Review {
+    private long reviewId;
+
+    @NotNull(message = "리뷰를 등록할 대상을 선택해주세요")
+    private int videoId;
+
+    @NotBlank(message = "작성자 아이디는 필수입니다")
+    private String reviewUserId;
+
+    @NotBlank(message = "작성자 닉네임은 필수입니다")
+    private String reviewUserNickName;
+
+    @NotBlank(message = "리뷰 내용을 입력하세요")
+    private String reviewContent;
+
+    private LocalDateTime reviewRegistDate;
+}
+
+// ReviewDao.java
+package com.ssafy.pjtFinal.model.dao;
+
+import com.ssafy.pjtFinal.model.dto.Review;
+import com.ssafy.pjtFinal.model.dto.SearchCondition;
+
+import java.util.List;
+
+public interface ReviewDao {
+    void reviewInsert(Review review);
+    List<Review> reviewSelectAllByCondition(SearchCondition condition);
+    List<Review> reviewSelectAll();
+    Review reviewSelectOne(int reviewId);
+    void reviewUpdate(Review review);
+    void reviewDelete(int reviewId);
+}
+
+// ReviewService.java
+package com.ssafy.pjtFinal.model.service;
+
+import java.util.*;
+import com.ssafy.pjtFinal.model.dto.Review;
+import com.ssafy.pjtFinal.model.dto.SearchCondition;
+
+public interface ReviewService {
+    // 리뷰 추가
+    void reviewAdd(Review review);
+
+    // 비디오, 유저 아이디 등 특정 조건에 따른 리뷰 목록 가져오기
+    List<Review> getReviewList(SearchCondition condition);
+
+    // 등록된 모든 리뷰 리스트
+    List<Review> getAllReviewList();
+
+    // 리뷰 하나
+    Review getReview(int reviewId);
+    
+    // 리뷰 수정
+    void reviewModify(Review review);
+    
+    // 리뷰 삭제
+    void reviewRemove(int reviewId);
+}
+
+// ReviewServiceImpl.java
+package com.ssafy.pjtFinal.model.service;
+
+import com.ssafy.pjtFinal.model.dao.ReviewDao;
+import com.ssafy.pjtFinal.model.dto.Review;
+import com.ssafy.pjtFinal.model.dto.SearchCondition;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ReviewServiceImpl implements ReviewService {
+
+    // 의존성 주입
+    ReviewDao reviewDao;
+    @Autowired
+    public ReviewServiceImpl(ReviewDao reviewDao){
+        this.reviewDao = reviewDao;
+    }
+
+    ////////////////////////////////
+    // 리뷰 추가
+    @Override
+    public void reviewAdd(Review review) {
+        reviewDao.reviewInsert(review);
+    }
+
+    // 비디오, 유저 아이디 등 특정 조건에 따른 리뷰 목록 가져오기
+    @Override
+    public List<Review> getReviewList(SearchCondition condition) {
+        return reviewDao.reviewSelectAllByCondition(condition);
+    }
+
+    // 모든 영상에 등록된 모든 리뷰 가져오기
+    @Override
+    public List<Review> getAllReviewList() {
+        return reviewDao.reviewSelectAll();
+    }
+
+    // 특정 리뷰 선택하기
+    @Override
+    public Review getReview(int reviewId) {
+        return reviewDao.reviewSelectOne(reviewId);
+    }
+
+    // 리뷰 수정
+    @Override
+    public void reviewModify(Review review) {
+        reviewDao.reviewUpdate(review);
+    }
+
+    // 리뷰 삭제
+    @Override
+    public void reviewRemove(int reviewId) {
+        reviewDao.reviewDelete(reviewId);
+    }
+}
+
+// SearchCondition.java
+package com.ssafy.pjtFinal.model.dto;
+
+public class SearchCondition {
+    private String key;
+    private String word;
+    private String orderBy;
+    private String orderByDir;
+
+    public SearchCondition() {
+    }
+
+    public SearchCondition(String key, String word, String orderBy, String orderByDir) {
+        this.key = key;
+        this.word = word;
+        this.orderBy = orderBy;
+        this.orderByDir = orderByDir;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getWord() {
+        return word;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
+
+    public String getOrderBy() {
+        return orderBy;
+    }
+
+    public void setOrderBy(String orderBy) {
+        this.orderBy = orderBy;
+    }
+
+    public String getOrderByDir() {
+        return orderByDir;
+    }
+
+    public void setOrderByDir(String orderByDir) {
+        this.orderByDir = orderByDir;
+    }
+
+    @Override
+    public String toString() {
+        return "SearchCondition{" +
+                "key='" + key + '\'' +
+                ", word='" + word + '\'' +
+                ", orderBy='" + orderBy + '\'' +
+                ", orderByDir='" + orderByDir + '\'' +
+                '}';
+    }
+}
+
+// LoginRequest.java
+package com.ssafy.pjtFinal.model.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class LoginRequest {
+    
+    @NotBlank(message = "아이디를 입력하세요")
+    private String userId;
+    
+    @NotBlank(message = "비밀번호를 입력하세요")
+    private String userPw;
+}
+
+// ErrorResponse.java
+package com.ssafy.pjtFinal.model.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.Map;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class ErrorResponse {
+    private int status;
+    private String message;
+    private Map<String, String> errors;
+} 

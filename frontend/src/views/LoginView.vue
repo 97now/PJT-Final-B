@@ -48,6 +48,7 @@ const onSubmit = async () => {
   try {
     await userStore.login(loginData);
     alert("로그인 성공 😎");
+    console.log("[loginView] token = " + userStore.token);
     router.push("/");
   } catch (error) {
     const errorMsg = userStore.error || "로그인 중 오류가 발생했습니다.";

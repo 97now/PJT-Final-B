@@ -15,6 +15,7 @@ defineProps({
 const emit = defineEmits(["toggleFollow"]);
 
 const toggleFollow = () => {
+  console.log("[FollowButton] toggleFollow 호출");
   emit("toggleFollow");
 };
 </script>
