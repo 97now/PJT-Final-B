@@ -63,10 +63,10 @@ onMounted(async () => {
   console.log(user.value);
 });
 
-const onUpdateFollowingCnt = (change) => {
+const onUpdateFollowingCnt = (newVal) => {
   console.log("[MyPageView] onUpdateUserInfo 호출");
-  user.value.followingCnt += change;
-  console.log(user.value);
+  user.value.followingCnt = newVal;
+  console.log("[MyPageView] user 정보 = " + user.value);
 };
 
 const currentView = computed(() => {

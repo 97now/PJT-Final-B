@@ -24,17 +24,22 @@ const relation = computed(() => route.params.relation);
 const followingList = ref([]);
 const followerList = ref([]);
 
+const userId = userStore.userId;
+
 onMounted(async () => {
-  const userId = userStore.userId;
   if (userId) {
     followingList.value = await userStore.fetchFollowingList(userId);
     followerList.value = await userStore.fetchFollowerList(userId);
   }
 });
 
-const updateFollowingCnt = (change) => {
+const updateFollowingCnt = async () => {
   console.log("[FollowListView] updateUserInfo 호출");
-  emit("updateFollowingCnt", change);
+  followingList.value = await userStore.fetchFollowingList(userId);
+  console.log(
+    "[FollowListView] followingList 길이 : " + followingList.value.length
+  );
+  emit("updateFollowingCnt", followingList.value.length);
 };
 
 const list = computed(() => {

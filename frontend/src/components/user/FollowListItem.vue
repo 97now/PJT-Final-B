@@ -29,20 +29,22 @@ const prop = defineProps({
 });
 const emit = defineEmits(["updateFollowingCnt"]);
 
-const onToggleFollow = (user) => {
+const onToggleFollow = async (user) => {
   console.log(
     "[FollowListItem] onToggleFollow 호출, targetId = " + user.userId
   );
 
-  if (!user.checkFollowed) {
-    userStore.followUser(user.userId);
-    emit("updateFollowingCnt", 1);
-  } else {
-    userStore.unfollowUser(user.userId);
-    emit("updateFollowingCnt", -1);
+  try {
+    if (!user.checkFollowed) {
+      await userStore.followUser(user.userId);
+    } else {
+      await userStore.unfollowUser(user.userId);
+    }
+    user.checkFollowed = !user.checkFollowed;
+    emit("updateFollowingCnt");
+  } catch {
+    console.error("팔로우 처리 중 오류 발생: ", error);
   }
-
-  user.checkFollowed = !user.checkFollowed;
 };
 </script>
 
