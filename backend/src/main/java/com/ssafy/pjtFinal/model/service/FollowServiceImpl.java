@@ -22,22 +22,36 @@ public class FollowServiceImpl implements FollowService {
     // 팔로우 추가
     @Override
     @Transactional
-    public void followAdd(Follow follow) {
+    public void followAdd(String followerId, String followeeId) {
+        Follow follow = new Follow();
+
+        follow.setFollower(followerId);
+        follow.setFollowee(followeeId);
         followDao.insertFollow(follow);
-        followDao.updateFollowerCnt(follow.getFollowee(), 1);
-        followDao.updateFollowingCnt(follow.getFollower(), -1);
+
+        followDao.updateFollowerCnt(followeeId, 1);
+        followDao.updateFollowingCnt(followerId, 1);
     }
 
     // 내가 팔로우하는 유저 리스트
     @Override
     public List<User> getFollowingList(String userId) {
-        return followDao.followingList(userId);
+
+        List<User> list = followDao.followingList(userId);
+        for (User u : list) {
+            u.setCheckFollowed(true);
+        }
+        return list;
     }
 
     // 나를 팔로우하는 유저 리스트
     @Override
     public List<User> getFollowerList(String userId) {
-        return followDao.followerList(userId);
+        List<User> list = followDao.followerList(userId);
+        for(User u : list) {
+            u.setCheckFollowed(checkFollowed(userId, u.getUserId()));
+        }
+        return list;
     }
 
     // 팔로잉 수
@@ -52,9 +66,11 @@ public class FollowServiceImpl implements FollowService {
         return followDao.followerCnt(userId);
     }
 
+    // 팔로우여부
     @Override
     public boolean checkFollowed(String followerId, String followeeId) {
-        return followDao.checkFollowed(followerId, followeeId) == 1;
+        Integer result = followDao.checkFollowed(followerId, followeeId);
+        return result != null && result == 1;
     }
 
     // 언팔로우

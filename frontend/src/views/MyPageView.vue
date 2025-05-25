@@ -1,5 +1,5 @@
 <template>
-  <div class="my-page-view">
+  <div class="my-page-view" v-if="user">
     <div class="myInfo">
       <ProfilePicture
         :img="imgUrl"
@@ -11,6 +11,7 @@
         <p>{{ user.userNickName }}</p>
       </div>
     </div>
+
     <div class="follow">
       <div
         :class="{ active: currentView === 'following' }"
@@ -30,12 +31,16 @@
 
     <!-- 화면 전환 -->
     <LikeVideoView v-if="currentView === 'default'" />
-    <FollowListView v-else :relation="currentView" />
+    <FollowListView
+      v-else
+      :relation="currentView"
+      @update-following-cnt="onUpdateFollowingCnt"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
@@ -47,9 +52,22 @@ const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
-const { user } = storeToRefs(userStore);
+const { userId } = storeToRefs(userStore);
 
+const user = ref(null);
 const imgUrl = ref("/User.png");
+
+onMounted(async () => {
+  user.value = await userStore.fetchUserInfo(userId.value);
+  console.log("로그인된 유저 : " + userId.value);
+  console.log(user.value);
+});
+
+const onUpdateFollowingCnt = (newVal) => {
+  console.log("[MyPageView] onUpdateUserInfo 호출");
+  user.value.followingCnt = newVal;
+  console.log("[MyPageView] user 정보 = " + user.value);
+};
 
 const currentView = computed(() => {
   const relation = route.params.relation;
@@ -57,15 +75,15 @@ const currentView = computed(() => {
 });
 
 function goToDefault() {
-  router.push(`/${user.value.userId}/myPage`);
+  router.push(`/${userId.value}/myPage`);
 }
 
 function goToFollowing() {
-  router.push(`/${user.value.userId}/myPage/follow-list/following`);
+  router.push(`/${userId.value}/myPage/follow-list/following`);
 }
 
 function goToFollower() {
-  router.push(`/${user.value.userId}/myPage/follow-list/follower`);
+  router.push(`/${userId.value}/myPage/follow-list/follower`);
 }
 </script>
 
@@ -114,7 +132,7 @@ function goToFollower() {
   text-align: center;
   align-items: center;
   font-weight: 500;
-  color: black;
+  color: #555;
   cursor: pointer;
   user-select: none;
   padding: 0 8px;
@@ -123,8 +141,8 @@ function goToFollower() {
 }
 
 .follow-btn.active {
+  color: black;
   font-weight: bold;
   text-decoration: underline;
-  background: #f0f0f0;
 }
 </style>

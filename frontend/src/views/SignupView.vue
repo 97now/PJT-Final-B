@@ -83,14 +83,14 @@
           <BaseInput
             type="text"
             id="email"
-            placeholder="이메일 계정 아이디"
+            placeholder="이메일 아이디"
             v-model="userEmail"
           />
           @
           <BaseInput
             type="text"
             id="emailDomain"
-            placeholder="이메일 도메인"
+            placeholder="도메인 입력"
             v-model="userEmailDomain"
           />
           <EmailDomainDropbox v-model="userEmailDomain" />

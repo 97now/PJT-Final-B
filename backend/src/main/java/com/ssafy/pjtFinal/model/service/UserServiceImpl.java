@@ -3,8 +3,7 @@ package com.ssafy.pjtFinal.model.service;
 import com.ssafy.pjtFinal.error.CustomException;
 import com.ssafy.pjtFinal.error.ErrorCode;
 import com.ssafy.pjtFinal.model.dao.UserDao;
-import com.ssafy.pjtFinal.model.dto.LoginRequest;
-import com.ssafy.pjtFinal.model.dto.User;
+import com.ssafy.pjtFinal.model.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,13 +27,10 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public void userAdd(User user) {
-//        System.out.println("[DEBUG] 회원가입 메서드 진입");
-
-        String encodedPw = passwordEncoder.encode(user.getUserPw());
-        user.setUserPw(encodedPw);
-
         if(userDao.userSelectOne(user.getUserId()) != null)
                 throw new CustomException(ErrorCode.DUPLICATE_USER_ID);
+        String encodedPw = passwordEncoder.encode(user.getUserPw());
+        user.setUserPw(encodedPw);
         userDao.userInsert(user);
     }
 
@@ -42,15 +38,12 @@ public class UserServiceImpl implements UserService{
     @Override
     public User userLogin(LoginRequest request) {
         User user = getUserOne(request.getUserId());
-
         if(user == null) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
-
         if(!passwordEncoder.matches(request.getUserPw(), user.getUserPw())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
-
         return user;
     }
 
@@ -58,6 +51,31 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getUserOne(String userId) {
         return userDao.userSelectOne(userId);
+    }
+
+    // 아이디 찾기
+    @Override
+    public String findId(FindIdRequest request) {
+        return userDao.findId(request);
+    }
+
+    // 비밀번호 찾기
+    @Override
+    public Boolean findPw(FindPwRequest request) {
+        Integer result = userDao.findPw(request);
+        return result != null && result == 1;
+    }
+
+    // 비밀번호 재설정
+    @Override
+    public void resetPw(ResetPwRequest request) {
+        User user = getUserOne(request.getUserId());
+        if(passwordEncoder.matches(request.getNewPw(), user.getUserPw())) {
+            throw new CustomException(ErrorCode.SAME_PASSWORD);
+        }
+        String encodedPw = passwordEncoder.encode(request.getNewPw());
+        request.setNewPw(encodedPw);
+        userDao.resetPw(request);
     }
 
     // 모든 유저 리스트
