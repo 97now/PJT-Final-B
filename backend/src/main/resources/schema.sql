@@ -8,12 +8,13 @@ CREATE TABLE user
 (
     user_id        VARCHAR(50) PRIMARY KEY,
     user_pw        VARCHAR(255) NOT NULL,
-    user_nick_name VARCHAR(50)  NOT NULL UNIQUE,
-    user_email     VARCHAR(100) NOT NULL UNIQUE,
+    user_nick_name VARCHAR(50)  NOT NULL,
+    user_email     VARCHAR(100) NOT NULL,
+    user_birth     DATE,
     user_phone     VARCHAR(20),
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     follower_cnt   int      DEFAULT 0,
-    followee_cnt   int      DEFAULT 0
+    following_cnt   int      DEFAULT 0
 );
 
 -- 비디오 테이블
@@ -62,6 +63,7 @@ CREATE TABLE follow
     follower    VARCHAR(50) NOT NULL,
     followee    VARCHAR(50) NOT NULL,
     followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_follow UNIQUE (follower, followee)
     CONSTRAINT fk_follow_follower FOREIGN KEY (follower) REFERENCES user (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_follow_followee FOREIGN KEY (followee) REFERENCES user (user_id) ON DELETE CASCADE
 );
@@ -80,17 +82,21 @@ VALUES ('user0', 'pw0encrypted', 'nickname0', 'user0@mail.com', '010-1234-5600',
 
 INSERT INTO video (video_id, video_title, video_part, video_url, video_view_cnt, video_like_cnt, video_channel_name,
                    org_img_name, unq_img_name)
-VALUES (1, '하루 15분! 전신 칼로리 불태우는 다이어트 운동', '전신운동', 'https://www.youtube.com/watch?v=swRNeYw1JkY', 1000000, 50000, '디글',
-        'original1.jpg', 'unique_1_1234.jpg'),
-       (2, '자극 최고! 덤벨 30분 기본 전신운동 홈트(상하체 통합편)', '전신운동', 'https://m.youtube.com/watch?v=L2-74-K-9VM', 800000, 40000,
-        '빵그리', 'original2.jpg', 'unique_2_5678.jpg'),
-       (3, '1시간 유산소 운동 효과 만들어주는 다이어트 댄스', '유산소운동', 'https://www.youtube.com/watch?v=e2RZlKLOv28', 600000, 30000, '맘즈헬스',
-        'original3.jpg', 'unique_3_9101.jpg'),
-       (4, '집에서 칼로리 소모 폭탄 걷기 운동 [칼소폭3]', '유산소운동', 'https://www.youtube.com/watch?v=MWnD6DhLjyc', 400000, 20000, '땅끄부부',
-        'original4.jpg', 'unique_4_1121.jpg'),
-       (5, '25 MINUTE Pilates that you have to do every day', '필라테스', 'https://www.youtube.com/watch?v=sb51gF18cYo',
-        200000, 10000, 'Pilates Channel', 'original5.jpg', 'unique_5_3141.jpg');
-
+VALUES
+(1, '하루 15분! 전신 칼로리 불태우는 다이어트 운동', '전신', 'https://www.youtube.com/watch?v=swRNeYw1JkY', 90000, 4500, '디글', 'original1.jpg', 'unique_1_1234.jpg'),
+(2, '자극 최고! 덤벨 30분 기본 전신운동 홈트(상하체 통합편)', '전신', 'https://m.youtube.com/watch?v=L2-74-K-9VM', 110000, 4700, '빵그리', 'original2.jpg', 'unique_2_5678.jpg'),
+(3, '1시간 유산소 운동 효과 만들어주는 다이어트 댄스', '전신', 'https://www.youtube.com/watch?v=e2RZlKLOv28', 150000, 5000, '맘즈헬스', 'original3.jpg', 'unique_3_9101.jpg'),
+(4, '집에서 칼로리 소모 폭탄 걷기 운동 [칼소폭3]', '전신', 'https://www.youtube.com/watch?v=MWnD6DhLjyc', 120000, 40000, '땅끄부부', 'original4.jpg', 'unique_4_1121.jpg'),
+(5, '25 MINUTE Pilates that you have to do every day', '코어', 'https://www.youtube.com/watch?v=sb51gF18cYo', 130000, 4400, 'Pilates Channel', 'original5.jpg', 'unique_5_3141.jpg'),
+(6, '푸쉬업만으로 가슴 근육 키우는 10분 루틴', '가슴', 'https://www.youtube.com/watch?v=IODxDxX7oi4', 200000, 3300, '운동채널D', 'original9.jpg', 'unique_9_4444.jpg'),
+(7, '하체 운동 끝판왕, 스쿼트 제대로 하는 법', '하체', 'https://www.youtube.com/watch?v=aclHkVaku9U', 140000, 3700, '운동채널G', 'original12.jpg', 'unique_12_7777.jpg'),
+(8, '집에서 하는 하체운동 15분 루틴', '하체', 'https://www.youtube.com/watch?v=2tM1LFFxeKg', 95000, 6000, '운동채널H', 'original13.jpg', 'unique_13_8888.jpg'),
+(9, '초보자도 따라하는 하체 근력운동', '하체', 'https://www.youtube.com/watch?v=QOVaHwm-Q6U', 200000, 20000, '운동채널I', 'original14.jpg', 'unique_14_9999.jpg'),
+(10, '팔뚝살 빼는 10분 팔 운동', '팔', 'https://www.youtube.com/watch?v=UItWltVZZmE', 180000, 8000, '운동채널J', 'original15.jpg', 'unique_15_1010.jpg'),
+(11, '덤벨로 하는 팔 운동 BEST 5', '팔', 'https://www.youtube.com/watch?v=ykJmrZ5v0Oo', 400000, 3100, '운동채널L', 'original17.jpg', 'unique_17_3030.jpg'),
+(12, '등이 무조건 넓어지는 최고의 운동루틴 5가지 (+꿀팁포함)' , '등', 'https://www.youtube.com/watch?v=rbRncfbhZ1k', 20000, 1000, '준규빌더', 'original18.jpg', 'unique_18_5555.jpg'),
+(13, '저는 딱 세가지만 해요 | 헬스장 관장이 알려주는 등 운동 루틴' , '등', 'https://www.youtube.com/watch?v=ZOCAFs7EUxo', 25001, 1300, '류관장', 'original19.jpg', 'unique_19_5155.jpg'),
+(14, '선수들은 알려주지 않는 가슴운동 노하우' , '가슴', 'https://www.youtube.com/watch?v=WMq6pLqkOqo', 15001, 1221, '성철봉', 'original20.jpg', 'unique_20_5115.jpg');
 INSERT INTO review (review_id, video_id, review_user_id, review_user_nick_name, review_content, review_regist_date)
 VALUES (1, 3, 'user0', 'nickname4', '운동 리뷰 1번입니다. 효과 좋아요!', '2023-09-16 00:00:00'),
        (2, 1, 'user7', 'nickname3', '운동 리뷰 2번입니다. 효과 좋아요!', '2023-04-25 00:00:00'),

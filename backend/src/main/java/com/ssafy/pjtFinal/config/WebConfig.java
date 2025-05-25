@@ -4,6 +4,7 @@ import com.ssafy.pjtFinal.interceptor.SessionInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,4 +29,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/user/login"    // 로그인
                 );
     }
+
+    // spring security 쓸 거면 SecurityConfig에 넣는 게 맞대
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:5173")
+//                .allowedMethods("GET", "POST", "PUT", "DELETE")
+//                .allowedHeaders("*")
+//                .allowCredentials(true);
+//    }
 }

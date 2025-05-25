@@ -17,7 +17,7 @@ public interface VideoLikeDao {
     List<Video> selectLikedVideoListByFollowingList(String userId);
 
     // 내가 좋아요 한 영상인지 확인
-    int checkLikedVideo(@Param("userId") String userId, @Param("videoId") long videoId);
+    Integer checkLikedVideo(@Param("userId") String userId, @Param("videoId") long videoId);
 
     // 영상 좋아요 개수 세기
     int likeCountByVideoId(@Param("videoId") long videoId);

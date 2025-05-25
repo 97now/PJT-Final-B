@@ -13,17 +13,19 @@
     <select id="reviewSelectAllByCondition" parameterType="SearchCondition" resultType="Review">
         SELECT * FROM review
         <where>
-            <choose>
-                <when test="key == video_id">
-                    video_id = #{word}
-                </when>
-                <when test="key == user_id">
-                    review_user_id = #{word}
-                </when>
-            </choose>
+            <if test="key != null and word != null">
+                <choose>
+                    <when test="key == 'video_id'">
+                        video_id = #{word}
+                    </when>
+                    <when test="key == 'user_id'">
+                        review_user_id = #{word}
+                    </when>
+                </choose>
+            </if>
         </where>
         <if test="orderBy != null">
-            ORDER BY #{orderBy} #{orderByDir}
+            ORDER BY ${orderBy} ${orderByDir}
         </if>
     </select>
 

@@ -42,7 +42,8 @@ public class VideoLikeServiceImpl implements VideoLikeService {
     // 좋아요 된 영상인지 확인하기
     @Override
     public boolean checkLikedVideo(String userId, long videoId) {
-        return videoLikeDao.checkLikedVideo(userId, videoId) == 1;
+        Integer result = videoLikeDao.checkLikedVideo(userId, videoId);
+        return result != null && result == 1;
     }
 
     // 영상 좋아요 개수 세기

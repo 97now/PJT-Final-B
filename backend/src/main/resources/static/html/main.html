@@ -177,100 +177,53 @@
       <div class="sort-bar">
         <button class="underline-btn">조회순 ▼</button>
       </div>
-      <div class="videos">
-        <div class="video-card">
-          <div class="video-thumb">
-            <img
-              src="/backend//src/main/resources/static/img//Video Call.png"
-              alt="비디오"
-            />
-          </div>
-          <div class="video-info">
-            <span class="video-title">푸쉬업 완벽 가이드</span>
-            <span class="video-meta">
-              <img
-                src="/backend//src/main/resources/static/img//Eye.png"
-                alt="조회수"
-                class="icon"
-              />150&nbsp;
-              <img
-                src="/backend//src/main/resources/static/img//Heart.png"
-                alt="좋아요"
-                class="icon"
-              />35
-            </span>
-          </div>
-        </div>
-        <div class="video-card">
-          <div class="video-thumb">
-            <img
-              src="/backend//src/main/resources/static/img//Video Call.png"
-              alt="비디오"
-            />
-          </div>
-          <div class="video-info">
-            <span class="video-title">스쿼트 제대로 하는 법</span>
-            <span class="video-meta">
-              <img
-                src="/backend//src/main/resources/static/img//Eye.png"
-                alt="조회수"
-                class="icon"
-              />200&nbsp;
-              <img
-                src="/backend//src/main/resources/static/img//Heart.png"
-                alt="좋아요"
-                class="icon"
-              />
-            </span>
-          </div>
-        </div>
-        <div class="video-card">
-          <div class="video-thumb">
-            <img
-              src="/backend//src/main/resources/static/img//Video Call.png"
-              alt="비디오"
-            />
-          </div>
-          <div class="video-info">
-            <span class="video-title">플랭크 5분 챌린지</span>
-            <span class="video-meta">
-              <img
-                src="/backend//src/main/resources/static/img//Eye.png"
-                alt="조회수"
-                class="icon"
-              />180&nbsp;
-              <img
-                src="/backend//src/main/resources/static/img//Heart.png"
-                alt="좋아요"
-                class="icon"
-              />40
-            </span>
-          </div>
-        </div>
-        <div class="video-card">
-          <div class="video-thumb">
-            <img
-              src="/backend//src/main/resources/static/img//Video Call.png"
-              alt="비디오"
-            />
-          </div>
-          <div class="video-info">
-            <span class="video-title">풀업 입문자 강좌</span>
-            <span class="video-meta">
-              <img
-                src="/backend//src/main/resources/static/img//Eye.png"
-                alt="조회수"
-                class="icon"
-              />120&nbsp;
-              <img
-                src="/backend//src/main/resources/static/img//Heart.png"
-                alt="좋아요"
-                class="icon"
-              />25
-            </span>
-          </div>
-        </div>
+      <div class="videos" id="videoList">
+        <!-- 비디오 카드가 여기에 동적으로 추가됩니다 -->
       </div>
     </div>
+
+    <script>
+      // 비디오 목록 가져오기
+      async function fetchVideos() {
+        try {
+          const response = await fetch('/api/video');
+          const videos = await response.json();
+          
+          const videoList = document.getElementById('videoList');
+          videoList.innerHTML = videos.map(video => `
+            <div class="video-card" onclick="location.href='/html/video-detail.html?id=${video.videoId}'">
+              <div class="video-thumb">
+                <img
+                  src="/backend//src/main/resources/static/img//Video Call.png"
+                  alt="비디오"
+                />
+              </div>
+              <div class="video-info">
+                <span class="video-title">${video.videoTitle}</span>
+                <span class="video-meta">
+                  <img
+                    src="/backend//src/main/resources/static/img//Eye.png"
+                    alt="조회수"
+                    class="icon"
+                  />${video.videoViewCnt}&nbsp;
+                  <img
+                    src="/backend//src/main/resources/static/img//Heart.png"
+                    alt="좋아요"
+                    class="icon"
+                  />${video.videoLikeCnt}
+                </span>
+              </div>
+            </div>
+          `).join('');
+        } catch (error) {
+          console.error('비디오 목록을 가져오는데 실패했습니다:', error);
+        }
+      }
+
+      // 페이지 로드 시 실행
+      window.onload = () => {
+        fetchVideos();
+      };
+    </script>
   </body>
 </html>

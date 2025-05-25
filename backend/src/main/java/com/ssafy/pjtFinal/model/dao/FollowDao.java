@@ -30,7 +30,7 @@ public interface FollowDao {
     void updateFollowerCnt(@Param("userId") String userId, @Param("change") int change);
 
     // 내가 팔로우 한 유저인지 확인
-    int checkFollowed(@Param("followerId") String followerId, @Param("followeeId") String followeeId);
+    Integer checkFollowed(@Param("followerId") String followerId, @Param("followeeId") String followeeId);
 
     // 팔로우 취소
     void deleteFollow(@Param("follower") String follower, @Param("followee") String followee);

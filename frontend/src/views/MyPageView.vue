@@ -1,57 +1,77 @@
 <template>
-  <div class="my-page-view">
+  <div class="my-page-view" v-if="user">
     <div class="myInfo">
       <ProfilePicture
         :img="imgUrl"
         alt="내 프로필 이미지"
         @click="goToDefault"
-        style="cursor:pointer"
+        style="cursor: pointer"
       />
-      <div class="nickname" @click="goToDefault" style="cursor:pointer">
-        <p>{{ userId }}</p>
+      <div class="nickname" @click="goToDefault" style="cursor: pointer">
+        <p>{{ user.userNickName }}</p>
       </div>
     </div>
+
     <div class="follow">
       <div
         :class="{ active: currentView === 'following' }"
         class="follow-btn"
         @click="goToFollowing"
       >
-        Following &nbsp; {{ followingNum }} 명
+        Following &nbsp; {{ user.followingCnt }} 명
       </div>
       <div
         :class="{ active: currentView === 'follower' }"
         class="follow-btn"
         @click="goToFollower"
       >
-        Follower &nbsp; {{ followerNum }} 명
+        Follower &nbsp; {{ user.followerCnt }} 명
       </div>
     </div>
 
     <!-- 화면 전환 -->
     <LikeVideoView v-if="currentView === 'default'" />
-    <FollowListView v-else :relation="currentView" />
+    <FollowListView
+      v-else
+      :relation="currentView"
+      @update-following-cnt="onUpdateFollowingCnt"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
 
+const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 
+const { userId } = storeToRefs(userStore);
+
+const user = ref(null);
 const imgUrl = ref("/User.png");
-const userId = ref("KIM");
-const followingNum = ref(4); // 실제 데이터로 교체
-const followerNum = ref(6);  // 실제 데이터로 교체
+
+onMounted(async () => {
+  user.value = await userStore.fetchUserInfo(userId.value);
+  console.log("로그인된 유저 : " + userId.value);
+  console.log(user.value);
+});
+
+const onUpdateFollowingCnt = (newVal) => {
+  console.log("[MyPageView] onUpdateUserInfo 호출");
+  user.value.followingCnt = newVal;
+  console.log("[MyPageView] user 정보 = " + user.value);
+};
 
 const currentView = computed(() => {
   const relation = route.params.relation;
-  return relation || 'default';
+  return relation || "default";
 });
 
 function goToDefault() {
@@ -112,7 +132,7 @@ function goToFollower() {
   text-align: center;
   align-items: center;
   font-weight: 500;
-  color: black;
+  color: #555;
   cursor: pointer;
   user-select: none;
   padding: 0 8px;
@@ -121,8 +141,8 @@ function goToFollower() {
 }
 
 .follow-btn.active {
+  color: black;
   font-weight: bold;
   text-decoration: underline;
-  background: #f0f0f0;
 }
 </style>
