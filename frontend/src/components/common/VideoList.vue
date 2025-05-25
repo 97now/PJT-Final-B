@@ -22,4 +22,5 @@ const props = defineProps({ videos: Array })
 @media (max-width: 700px) {
   .videos { gap: 16px; }
 }
+
 </style>

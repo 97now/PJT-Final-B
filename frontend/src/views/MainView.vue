@@ -41,56 +41,6 @@ onMounted(() => {
       console.error("비디오 데이터 불러오기 실패:", error);
     })
 })
-// const videos = ref([
-//   {
-//     id: 1,
-//     title: "푸쉬업 완벽 가이드",
-//     category: "가슴",
-//     thumb: "../img/Video%20Call.png",
-//     views: 10,
-//     likes: 35,
-//   },
-//   {
-//     id: 2,
-//     title: "스쿼트 제대로 하는 법",
-//     category: "하체",
-//     thumb: "../img/Video%20Call.png",
-//     views: 20,
-//     likes: 52,
-//   },
-//   {
-//     id: 3,
-//     title: "플랭크 5분 챌린지",
-//     category: "코어",
-//     thumb: "../img/Video%20Call.png",
-//     views: 18,
-//     likes: 40,
-//   },
-//   {
-//     id: 4,
-//     title: "풀업 입문자 강좌",
-//     category: "등",
-//     thumb: "../img/Video%20Call.png",
-//     views: 12,
-//     likes: 25,
-//   },
-//   {
-//     id: 5,
-//     title: "풀업 중급자 강좌",
-//     category: "등",
-//     thumb: "../img/Video%20Call.png",
-//     views: 133,
-//     likes: 25,
-//   },
-//   {
-//     id: 6,
-//     title: "풀업 상상급자 강좌",
-//     category: "등",
-//     thumb: "../img/Video%20Call.png",
-//     views: 17,
-//     likes: 122,
-//   },
-// ]);
 
 const searchKeyword = ref("");
 const selectedCategory = ref("");

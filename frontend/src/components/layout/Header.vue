@@ -16,9 +16,11 @@
       >
     </nav>
     <nav v-else class="header-actions">
-      <router-link to="/" @click="logout" class="header-link"
+      <img :src="logoutIcon" alt="signup" class="icon" />
+      <router-link to="/" @click="logOut" class="header-link"
         >logout</router-link
       >
+      <img :src="userIcon" alt="signup" class="icon" />
       <router-link
         class="header-link"
         :to="{
@@ -39,7 +41,9 @@ import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
 import adduserIcon from "@/assets/img/Add_User.png";
+import userIcon from "@/assets/img/User.png";
 import loginIcon from "@/assets/img/Login.png";
+import logoutIcon from "@/assets/img/Logout.png";
 
 const userStore = useUserStore();
 
