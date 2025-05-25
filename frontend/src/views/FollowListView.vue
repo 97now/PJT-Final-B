@@ -36,6 +36,7 @@ onMounted(async () => {
 const updateFollowingCnt = async () => {
   console.log("[FollowListView] updateUserInfo 호출");
   followingList.value = await userStore.fetchFollowingList(userId);
+  followerList.value = await userStore.fetchFollowerList(userId);
   console.log(
     "[FollowListView] followingList 길이 : " + followingList.value.length
   );

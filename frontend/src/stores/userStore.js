@@ -61,6 +61,10 @@ export const useUserStore = defineStore("user", {
         this.token = response.data.token;
         this.isLoggedIn = true;
         this.userId = response.data.userId;
+
+        console.log("[userStore.js] 로그인 후 token = " + this.token);
+        console.log("[userStore.js] 로그인 후 isLoggedIn = " + this.isLoggedIn);
+        console.log("[userStore.js] 로그인 후 userId = " + this.userId);
       } catch (error) {
         const msg =
           error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
@@ -70,11 +74,17 @@ export const useUserStore = defineStore("user", {
     },
 
     // 로그아웃
-    async logout() {
+    logout() {
       try {
         this.userId = null;
         this.isLoggedIn = false;
         this.token = null;
+
+        console.log("[userStore.js] 로그아웃 후 token = " + this.token);
+        console.log(
+          "[userStore.js] 로그아웃 후 isLoggedIn = " + this.isLoggedIn
+        );
+        console.log("[userStore.js] 로그아웃 후 userId = " + this.userId);
       } catch (error) {
         this.error =
           error.response?.data?.message || "로그아웃 중 오류가 발생했습니다.";

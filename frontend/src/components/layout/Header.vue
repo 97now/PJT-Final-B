@@ -3,7 +3,7 @@
     <div class="header-title">
       <router-link to="/">SSAFIT</router-link>
     </div>
-    <nav v-if="!isLoggedIn" class="header-actions">
+    <nav v-if="!token" class="header-actions">
       <i class="fas fa-user header-icon"></i>
       <img :src="adduserIcon" alt="signup" class="icon" />
       <router-link :to="{ name: 'signUp' }" class="header-link"
@@ -16,7 +16,7 @@
       >
     </nav>
     <nav v-else class="header-actions">
-      <router-link to="/" @click="logOut" class="header-link"
+      <router-link to="/" @click="logout" class="header-link"
         >logout</router-link
       >
       <router-link
@@ -43,11 +43,11 @@ import loginIcon from "@/assets/img/Login.png";
 
 const userStore = useUserStore();
 
-const { isLoggedIn } = storeToRefs(userStore);
+const { token } = storeToRefs(userStore);
 
-const logOut = () => {
-  console.log(isLoggedIn.value);
-  isLoggedIn.value = !isLoggedIn.value;
+const logout = () => {
+  userStore.logout();
+  console.log("[Header] 토큰 : " + token.value);
 };
 </script>
 
