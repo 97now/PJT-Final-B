@@ -1,6 +1,8 @@
 package com.ssafy.pjtFinal.model.service;
 
 import com.ssafy.pjtFinal.model.dto.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -17,8 +19,9 @@ public interface UserService {
     Boolean findPw(FindPwRequest request);
     // 비밀번호 재설정
     void resetPw(ResetPwRequest request);
-    // 유저 모두
-    List<User> getUserAll();
+    // 모든 유저 리스트
+    List<User> getUserAll(String userId);
+
     // 유저 수정
     void userModify(User user);
     // 유저 삭제

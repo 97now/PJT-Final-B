@@ -63,12 +63,12 @@ CREATE TABLE follow
     follower    VARCHAR(50) NOT NULL,
     followee    VARCHAR(50) NOT NULL,
     followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_follow UNIQUE (follower, followee)
+    CONSTRAINT uq_follow UNIQUE (follower, followee),
     CONSTRAINT fk_follow_follower FOREIGN KEY (follower) REFERENCES user (user_id) ON DELETE CASCADE,
     CONSTRAINT fk_follow_followee FOREIGN KEY (followee) REFERENCES user (user_id) ON DELETE CASCADE
 );
 
-INSERT INTO user (user_id, user_pw, user_nick_name, user_email, user_phone, created_at, follower_cnt, followee_cnt)
+INSERT INTO user (user_id, user_pw, user_nick_name, user_email, user_phone, created_at, follower_cnt, following_cnt)
 VALUES ('user0', 'pw0encrypted', 'nickname0', 'user0@mail.com', '010-1234-5600', '2024-10-27 00:00:00', 8, 7),
        ('user1', 'pw1encrypted', 'nickname1', 'user1@mail.com', '010-1234-5601', '2024-01-06 00:00:00', 0, 2),
        ('user2', 'pw2encrypted', 'nickname2', 'user2@mail.com', '010-1234-5602', '2024-03-17 00:00:00', 4, 1),

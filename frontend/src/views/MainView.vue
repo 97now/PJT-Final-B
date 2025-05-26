@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <SearchBar @search="onSearch" />
+    <SearchBar @search="onSearch" placeholder="검색어를 입력하세요" />
     <CategoryButtons
       :categories="categories"
       :selected="selectedCategory"

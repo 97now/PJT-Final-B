@@ -8,6 +8,7 @@
       <p>{{ user.userId }}</p>
     </div>
     <FollowButton
+      v-if="userId !== user.userId"
       :value="user.isFollowed ? 'Following' : 'Follow'"
       :is-followed="user.checkFollowed"
       @toggle-follow="onToggleFollow(user)"
@@ -22,6 +23,8 @@ import FollowButton from "../common/FollowButton.vue";
 import { useUserStore } from "@/stores/userStore";
 
 const userStore = useUserStore();
+
+const userId = userStore.userId;
 
 const imgUrl = ref("/User.png");
 const prop = defineProps({

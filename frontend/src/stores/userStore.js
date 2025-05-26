@@ -113,6 +113,19 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    async fetchUserList() {
+      try {
+        const response = await api.get(`http://localhost:8080/api/user`);
+
+        return response.data;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "사용자 목록 조회 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
     // 아이디 찾기
     async findId(findIdData) {
       console.log(

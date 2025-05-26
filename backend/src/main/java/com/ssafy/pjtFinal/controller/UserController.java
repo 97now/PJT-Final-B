@@ -14,6 +14,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,9 +76,8 @@ public class UserController {
 
     // 유저 조회 (전체)
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getUserAll();
-
+    public ResponseEntity<List<User>> getAllUsers(@AuthenticationPrincipal UserDetails userDetails) {
+        List<User> users = userService.getUserAll(userDetails.getUsername());
         return users.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(users);
     }
 

@@ -9,7 +9,9 @@ import { onMounted } from "vue";
 import VideoCard from "./VideoCard.vue";
 const props = defineProps({ videos: Array });
 
-onMounted(() => console.log("[VideoList] videos = " + props.videos));
+onMounted(() =>
+  console.log("[VideoList] videos = " + JSON.stringify(props.videos))
+);
 </script>
 
 <style scoped>

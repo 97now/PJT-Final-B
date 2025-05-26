@@ -5,6 +5,8 @@ import com.ssafy.pjtFinal.error.ErrorCode;
 import com.ssafy.pjtFinal.model.dao.UserDao;
 import com.ssafy.pjtFinal.model.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +17,14 @@ import java.util.List;
 public class UserServiceImpl implements UserService{
 
     private final PasswordEncoder passwordEncoder;
+    private final FollowService followService;
     // 의존성 주입
     UserDao userDao;
     @Autowired
-    public UserServiceImpl(UserDao userDao, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserDao userDao, PasswordEncoder passwordEncoder, FollowService followService) {
         this.userDao = userDao;
         this.passwordEncoder = passwordEncoder;
+        this.followService = followService;
     }
 
     // 회원가입
@@ -80,7 +84,12 @@ public class UserServiceImpl implements UserService{
 
     // 모든 유저 리스트
     @Override
-    public List<User> getUserAll() {
+    public List<User> getUserAll(String userId){
+        List<User> userList = userDao.userSelectAll();
+
+        for(User u : userList) {
+            u.setCheckFollowed(followService.checkFollowed(userId, u.getUserId()));
+        }
         return userDao.userSelectAll();
     }
 
