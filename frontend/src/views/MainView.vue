@@ -1,6 +1,10 @@
 <template>
   <div class="container">
-    <SearchBar @search="onSearch" placeholder="검색어를 입력하세요" />
+    <SearchBar
+      class="searchBar"
+      @search="onSearch"
+      placeholder="검색어를 입력하세요"
+    />
     <CategoryButtons
       :categories="categories"
       :selected="selectedCategory"
@@ -83,6 +87,12 @@ const filteredVideos = computed(() => {
   flex-direction: column;
   align-items: center;
 }
+
+.searchBar {
+  border-bottom: 2px solid #000;
+  width: fit-content;
+}
+
 @media (max-width: 700px) {
   .container {
     max-width: 100%;

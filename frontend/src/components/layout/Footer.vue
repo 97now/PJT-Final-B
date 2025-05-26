@@ -15,8 +15,11 @@ const userStore = useUserStore();
 const { userId } = storeToRefs(userStore);
 
 const deleteUser = () => {
-  userStore.deleteUser(userId.value);
-  router.push("/");
+  if (confirm("정말로 탈퇴하시겠습니까?")) {
+    userStore.deleteUser(userId.value);
+    router.push("/");
+    alert("유저가 삭제되었습니다");
+  }
 };
 </script>
 

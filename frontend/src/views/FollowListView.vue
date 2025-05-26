@@ -49,7 +49,7 @@ onMounted(async () => {
     followingList.value = await userStore.fetchFollowingList(userId);
     followerList.value = await userStore.fetchFollowerList(userId);
     allUserList.value = await userStore.fetchUserList();
-    console.log("[FollowListView] allUserList = " + allUserList.value);
+    // console.log("[FollowListView] allUserList = " + allUserList.value);
   }
 });
 
@@ -67,8 +67,9 @@ const list = computed(() => {
   if (relation.value === "follower") {
     return followerList.value;
   } else if (relation.value === "following") {
+    // console.log(JSON.stringify(followingList.value));
     return followingList.value;
-  } else if (relation.value === "search") {
+  } else if (keyword.value && relation.value === "search") {
     const searchResult = allUserList.value.filter((user) =>
       user.userNickName.toLowerCase().includes(keyword.value.toLowerCase())
     );
@@ -78,9 +79,9 @@ const list = computed(() => {
       user.checkFollowed = isFollowed;
     });
 
-    console.log(
-      "[FollowListView] searchResult = " + JSON.stringify(searchResult)
-    );
+    // console.log(
+    //   "[FollowListView] searchResult = " + JSON.stringify(searchResult)
+    // );
     return searchResult;
   } else {
     return [];

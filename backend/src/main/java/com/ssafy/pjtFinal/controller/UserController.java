@@ -29,11 +29,13 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserService userService) {
+    public UserController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // 유저 등록
@@ -47,25 +49,33 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println("[UserController] 로그인 요청 들어옴");
+
         try {
-            User user = userService.userLogin(request);
+//            User user = userService.userLogin(request);
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUserId(), request.getUserPw())
             );
-
             String token = jwtUtil.generateToken(request.getUserId());
-
             return ResponseEntity.ok(new LoginResponse(token, request.getUserId()));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호 틀림 😕");
         }
+    }
+
+    // 비밀번호 인증
+    @PostMapping("/verifyPw")
+    public ResponseEntity<Boolean> verifyPassword(@RequestBody LoginRequest request) {
+        boolean result = userService.verifyPassword(request);
+//        System.out.println("[UserController] 비밀번호 인증 결과 = " + result);
+        return ResponseEntity.ok(result);
     }
 
     // 유저 조회 (단일)
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUser(@PathVariable String userId) {
-        System.out.println("[UserController] 유저 조회 진입");
+//        System.out.println("[UserController] 유저 조회 진입");
         User user = userService.getUserOne(userId);
 
         if(user == null)

@@ -49,7 +49,6 @@ watch(searchValue, (newValue) => {
   padding: 8px 8px 6px 8px;
   margin-left: 10px;
   border: none;
-  border-bottom: 2px solid #000;
   outline: none;
   font-size: 17px;
   background: transparent;

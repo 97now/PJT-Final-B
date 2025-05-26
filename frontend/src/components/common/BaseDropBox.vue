@@ -3,7 +3,7 @@
   <select
     :value="modelValue"
     @change="$emit('update:modelValue', $event.target.value)"
-    required
+    :required="required"
   >
     <option disabled value="">{{ placeholder }}</option>
     <option v-for="item in options" :key="item" :value="item">
@@ -17,6 +17,7 @@ defineProps({
   modelValue: [String, Number],
   options: Array,
   placeholder: String,
+  required: String,
 });
 defineEmits(["update:modelValue"]);
 </script>

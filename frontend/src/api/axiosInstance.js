@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useUserStore } from "@/stores/userStore";
 
 const api = axios.create({
   baseURL: "http://localhost:8080",
@@ -15,6 +16,19 @@ export function setAuthInterceptor(getToken) {
 
     return config;
   });
+
+  // 응답 인터셉터 추가
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        const userStore = useUserStore();
+        userStore.logout();
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+  );
 }
 
 export default api;
