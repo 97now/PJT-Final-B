@@ -14,7 +14,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long expiration = 1000 * 60 * 60 * 3; // 3시간
+    private final long expiration = 1000 * 60 * 60; // 3시간
 
     // JWT 생성
     public String generateToken(String userId) {

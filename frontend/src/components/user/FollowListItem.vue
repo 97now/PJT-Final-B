@@ -9,7 +9,7 @@
     </div>
     <FollowButton
       v-if="userId !== user.userId"
-      :value="user.isFollowed ? 'Following' : 'Follow'"
+      :value="user.checkFollowed ? 'Following' : 'Follow'"
       :is-followed="user.checkFollowed"
       @toggle-follow="onToggleFollow(user)"
     />

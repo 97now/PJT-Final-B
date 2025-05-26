@@ -37,7 +37,7 @@ onMounted(() => {
         url: v.videoUrl,
       }));
 
-      console.log("[MainView] videos = " + JSON.stringify(videos.value));
+      // console.log("[MainView] videos = " + JSON.stringify(videos.value));
     })
     .catch((error) => {
       console.error("비디오 데이터 불러오기 실패:", error);
@@ -59,9 +59,9 @@ const onSort = (type) => {
 };
 
 const filteredVideos = computed(() => {
-  console.log("[MainView] selectedCategory : " + selectedCategory.value);
-  console.log("[MainView] searchKeyword : " + searchKeyword.value);
-  console.log("[MainView] sortType : " + sortType.value);
+  // console.log("[MainView] selectedCategory : " + selectedCategory.value);
+  // console.log("[MainView] searchKeyword : " + searchKeyword.value);
+  // console.log("[MainView] sortType : " + sortType.value);
   let result = videos.value;
   if (searchKeyword.value) {
     result = result.filter((v) => v.title.includes(searchKeyword.value));
