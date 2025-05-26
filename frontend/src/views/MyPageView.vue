@@ -12,6 +12,14 @@
       </div>
     </div>
 
+    <!-- 유저 검색 -->
+    <SearchBar
+      v-model="searchKeyword"
+      @search="onSearch"
+      placeholder="닉네임을 입력하세요"
+    />
+
+    <!-- follow 정보 -->
     <div class="follow">
       <div
         :class="{ active: currentView === 'following' }"
@@ -34,6 +42,7 @@
     <FollowListView
       v-else
       :relation="currentView"
+      :keyword="searchKeyword"
       @update-following-cnt="onUpdateFollowingCnt"
     />
   </div>
@@ -47,6 +56,7 @@ import { useUserStore } from "@/stores/userStore";
 import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
+import SearchBar from "@/components/common/SearchBar.vue";
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -59,7 +69,7 @@ const imgUrl = ref("/User.png");
 
 onMounted(async () => {
   user.value = await userStore.fetchUserInfo(userId.value);
-  console.log("로그인된 유저 : " + userId.value);
+  // console.log("로그인된 유저 : " + userId.value);
   console.log(user.value);
 });
 
@@ -69,12 +79,30 @@ const onUpdateFollowingCnt = (newVal) => {
   console.log("[MyPageView] user 정보 = " + user.value);
 };
 
+// 유저 검색
+const searchKeyword = ref("");
+const onSearch = (keyword) => {
+  console.log("[MyPageView] 검색 키워드 = " + keyword);
+  searchKeyword.value = keyword;
+
+  if (keyword.trim()) {
+    router.push(`/${userId.value}/myPage/follow-list/search`);
+  } else {
+    goToDefault();
+  }
+};
+
+// 보여줄 내용 구분
 const currentView = computed(() => {
   const relation = route.params.relation;
+  if (searchKeyword.value.trim()) {
+    return "search";
+  }
   return relation || "default";
 });
 
 function goToDefault() {
+  searchKeyword.value = "";
   router.push(`/${userId.value}/myPage`);
 }
 
@@ -120,10 +148,13 @@ function goToFollower() {
   display: flex;
   padding: 0px 60px;
   justify-content: space-between;
-  height: 70px;
+  height: 40px;
   align-items: end;
-  border-bottom: 3px solid #7e7e7e;
-  margin-bottom: 20px;
+  background-color: #eee;
+  border-radius: 10px;
+  align-items: center;
+  /* border-bottom: 3px solid #7e7e7e; */
+  margin: 20px 0px;
 }
 
 .follow-btn {
