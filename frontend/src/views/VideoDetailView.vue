@@ -7,6 +7,7 @@ import heartIcon from "@/assets/img/Heart.png";
 import pencilIcon from "@/assets/img/Pencil.png";
 import deleteIcon from "@/assets/img/delete.png";
 import CommentInput from "@/components/layout/CommentInput.vue";
+import CommentList from "@/components/layout/CommentList.vue";
 
 import { useUserStore } from "@/stores/userStore";
 const userStore = useUserStore();
@@ -243,45 +244,17 @@ async function submitEdit(content) {
       </div>
     </div>
     <hr class="divider" />
-    <ul class="comment-list">
-      <li
-        v-for="(comment, idx) in comments"
-        :key="comment.id"
-        class="comment-item"
-      >
-        <span class="comment-index">{{ idx + 1 }}.</span>
-        <span class="comment-text">
-          <strong>{{ comment.user }}</strong> :
-          <template v-if="editingCommentId === comment.id">
-            <CommentInput
-              :editMode="true"
-              :initialContent="editingContent"
-              @submit="submitEdit"
-              @cancel="cancelEdit"
-            />
-          </template>
-          <template v-else>
-            {{ comment.text }}
-            <span style="color: #888; font-size: 12px" v-if="comment.date"
-              >({{ comment.date }})</span
-            >
-          </template>
-        </span>
-        <span class="comment-actions" v-if="comment.userId === myUserId">
-          <a @click="startEdit(comment)" class="action-link">
-            <img :src="pencilIcon" alt="수정" class="action-icon" />
-            수정
-          </a>
-          <span class="action-divider">|</span>
-          <a @click="deleteComment(comment.id)" class="action-link">
-            <img :src="deleteIcon" alt="삭제" class="action-icon" />
-            삭제
-          </a>
-        </span>
-      </li>
-    </ul>
-    <!-- 댓글 입력창 (수정 중이 아닐 때만) -->
-    <CommentInput v-if="!editingCommentId" @submit="addComment" />
+    <CommentList
+      :comments="comments"
+      :myUserId="myUserId"
+      :editingCommentId="editingCommentId"
+      :editingContent="editingContent"
+      @startEdit="startEdit"
+      @cancelEdit="cancelEdit"
+      @submitEdit="submitEdit"
+      @deleteComment="deleteComment"
+    />
+    <CommentInput v-if="!editingCommentId" @submit="addComment" />    
   </div>
 </template>
 
