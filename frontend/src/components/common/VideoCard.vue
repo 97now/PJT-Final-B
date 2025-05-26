@@ -35,26 +35,38 @@ function getYoutubeThumbnail(url) {
 </script>
 
 <style scoped>
-.video-card {
-  flex: 0 1 calc(50% - 15px); /* 2열로 배치, gap 고려 */
+.videos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
   box-sizing: border-box;
+}
+
+.video-card {
+  flex: 0 1 calc(50% - 10px);
+  display: flex;
+  flex-direction: column;
   background: #eee;
   border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 0;
+  margin-bottom: 0;
   width: 100%;
-  max-width: 400px;
-  min-width: 280px;
+  max-width: 300px;
+  min-width: 150px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .video-thumb {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #ccc;
-  border-radius: 10px;
   overflow: hidden;
-  flex-shrink: 0;
 }
+
 .video-thumb img {
   width: 100%;
   height: 100%;
@@ -64,7 +76,7 @@ function getYoutubeThumbnail(url) {
 }
 
 .video-info {
-  margin-top: 15px;
+  padding: 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,7 +89,7 @@ function getYoutubeThumbnail(url) {
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
-  min-width: 0; /* 텍스트 오버플로우를 위해 필요 */
+  min-width: 0;
 }
 
 .video-meta {
@@ -86,7 +98,7 @@ function getYoutubeThumbnail(url) {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex-shrink: 0; /* 메타 정보는 줄어들지 않도록 */
+  flex-shrink: 0;
 }
 
 .icon {
@@ -97,9 +109,13 @@ function getYoutubeThumbnail(url) {
 }
 
 @media (max-width: 700px) {
+  .videos {
+    gap: 10px;
+  }
   .video-card {
     flex: 0 1 100%;
     max-width: 100%;
   }
 }
 </style>
+
