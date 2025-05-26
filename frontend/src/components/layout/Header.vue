@@ -3,7 +3,7 @@
     <div class="header-title">
       <router-link to="/">SSAFIT</router-link>
     </div>
-    <nav v-if="!loggedIn" class="header-actions">
+    <nav v-if="!token" class="header-actions">
       <i class="fas fa-user header-icon"></i>
       <img :src="adduserIcon" alt="signup" class="icon" />
       <router-link :to="{ name: 'signUp' }" class="header-link"
@@ -16,9 +16,11 @@
       >
     </nav>
     <nav v-else class="header-actions">
-      <router-link to="/" @click="logOut" class="header-link"
+      <img :src="logoutIcon" alt="signup" class="icon" />
+      <router-link to="/" @click="logout" class="header-link"
         >logout</router-link
       >
+      <img :src="userIcon" alt="signup" class="icon" />
       <router-link
         class="header-link"
         :to="{
@@ -33,17 +35,22 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 
 import adduserIcon from "@/assets/img/Add_User.png";
+import userIcon from "@/assets/img/User.png";
 import loginIcon from "@/assets/img/Login.png";
+import logoutIcon from "@/assets/img/Logout.png";
 
-const loggedIn = ref(true);
+const userStore = useUserStore();
 
-const logOut = () => {
-  console.log(loggedIn.value);
-  loggedIn.value = !loggedIn.value;
+const { token } = storeToRefs(userStore);
+
+const logout = () => {
+  userStore.logout();
+  console.log("[Header] 토큰 : " + token.value);
 };
 </script>
 

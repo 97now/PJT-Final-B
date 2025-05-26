@@ -34,7 +34,7 @@ public class ReviewController {
 
     // 비디오, 유저 아이디 등 특정 조건에 따른 리뷰 목록 가져오기
     @GetMapping
-    public ResponseEntity<List<Review>> getReviewListByCondition(@RequestBody SearchCondition condition){
+    public ResponseEntity<List<Review>> getReviewListByCondition(@ModelAttribute SearchCondition condition){
         List<Review> reviewList = reviewService.getReviewList(condition);
         return ResponseEntity.ok(reviewList);
     }

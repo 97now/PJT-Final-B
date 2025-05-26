@@ -13,4 +13,6 @@ public interface VideoDao {
     void videoDelete(long videoId);
     List<Video> videoSearch(SearchCondition condition);
     void videoUpdateViewCount(long videoId);
+
+
 }

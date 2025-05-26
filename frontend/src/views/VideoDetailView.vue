@@ -1,58 +1,260 @@
 <script setup>
-import { ref } from "vue";
-
-const comments = ref([
-  { id: 1, text: "정말 재미있어요" },
-  { id: 2, text: "유익해요" },
-  { id: 3, text: "근성장 맛보기" },
-  { id: 4, text: "3대 500가즈아" },
-  { id: 5, text: "집중력 최고" },
-  { id: 6, text: "발린이를 위한 운동" },
-]);
-const likes = ref(100);
-const views = ref(1234);
-
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import api from "@/api/axiosInstance";
 import eyeIcon from "@/assets/img/Eye.png";
 import heartIcon from "@/assets/img/Heart.png";
-import videoCallIcon from "@/assets/img/Video_Call.png";
-</script>
+import pencilIcon from "@/assets/img/Pencil.png";
+import deleteIcon from "@/assets/img/delete.png";
+import CommentInput from "@/components/layout/CommentInput.vue";
+import CommentList from "@/components/layout/CommentList.vue";
 
+import { useUserStore } from "@/stores/userStore";
+const userStore = useUserStore();
+const isLiked = ref(false);
+
+const route = useRoute();
+
+const videoTitle = ref("");
+const likes = ref(0);
+const views = ref(0);
+const videoUrl = ref("");
+
+const myUserId = computed(() => userStore.userId);
+const comments = ref([]);
+const editingCommentId = ref(null);
+const editingContent = ref("");
+
+function onLikeClick() {
+  if (!userStore.isLoggedIn) {
+    alert("로그인 후 이용해 주세요.");
+    return;
+  }
+  const videoId = route.params.id;
+  const userId = userStore.userId;
+
+  if (!isLiked.value) {
+    // 좋아요 추가
+    api
+      .post("/api/video-like", {
+        userId,
+        videoId,
+      })
+      .then(() => {
+        likes.value += 1;
+        isLiked.value = true;
+      })
+      .catch((err) => {
+        alert("좋아요 처리 중 오류가 발생했습니다.");
+      });
+  } else {
+    // 좋아요 취소
+    api
+      .delete(`/api/video-like/user/${userId}/video/${videoId}`)
+      .then(() => {
+        likes.value -= 1;
+        isLiked.value = false;
+      })
+      .catch((err) => {
+        alert("좋아요 취소 중 오류가 발생했습니다.");
+      });
+  }
+}
+
+function getYoutubeId(url) {
+  if (!url) return "";
+  const regExp = /(?:youtube\.com.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match && match[1] ? match[1] : "";
+}
+
+const youtubeEmbedUrl = computed(() => {
+  const id = getYoutubeId(videoUrl.value);
+  return id ? `https://www.youtube.com/embed/${id}` : "";
+});
+
+function getYoutubeThumbnail(url) {
+  if (!url) return "";
+  const regExp = /(?:youtube\.com.*[?&]v=|youtu\.be\/)([A-Za-z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match && match[1]
+    ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`
+    : "";
+}
+
+const loginUser = ref(null);
+onMounted(async () => {
+  if (userStore.isLoggedIn) {
+    loginUser.value = await userStore.fetchUserInfo(myUserId.value);
+    console.log(loginUser.value);
+  }
+
+  const videoId = route.params.id;
+  const userId = userStore.userId;
+
+  if (userStore.isLoggedIn) {
+    api
+      .get(`/api/video-like/user/${userId}/video/${videoId}/check`)
+      .then((res) => {
+        isLiked.value = res.data === true;
+      });
+  }
+
+  api.get(`/api/video/${videoId}`).then((res) => {
+    videoTitle.value = res.data.videoTitle;
+    likes.value = res.data.videoLikeCnt;
+    views.value = res.data.videoViewCnt;
+    videoUrl.value = res.data.videoUrl;
+  });
+
+  api
+    .get("/api/review", {
+      params: {
+        key: "video_id",
+        word: videoId,
+      },
+    })
+    .then((res) => {
+      console.log("서버에서 받아온 댓글 데이터:", res.data); // 서버에서 받아온 데이터 확인
+      comments.value = res.data.map((r) => ({
+        id: r.reviewId,
+        text: r.reviewContent,
+        user: r.reviewUserNickName,
+        date: r.reviewRegistDate,
+        userId: r.reviewUserId,
+      }));
+      console.log("변환된 댓글 목록:", comments.value); // 변환된 댓글 목록 확인
+    });
+});
+
+// 댓글 등록
+async function addComment(content) {
+  const videoId = Number(route.params.id);
+  const reviewUserId = userStore.userId;
+  const reviewUserNickName = loginUser.value.userNickName;
+  const payload = {
+    videoId,
+    reviewUserId,
+    reviewUserNickName,
+    reviewContent: content,
+  };
+  console.log("댓글 등록 payload:", payload);
+  try {
+    await api.post("/api/review", payload);
+    // 댓글 목록 새로고침
+    const res = await api.get("/api/review", {
+      params: {
+        key: "video_id",
+        word: videoId,
+      },
+    });
+    comments.value = res.data.map((r) => ({
+      id: r.reviewId,
+      text: r.reviewContent,
+      user: r.reviewUserNickName,
+      date: r.reviewRegistDate,
+      userId: r.reviewUserId,
+    }));
+  } catch (error) {
+    console.log("댓글 등록 에러:", error.response?.data || error);
+    alert(
+      "댓글 등록 중 오류가 발생했습니다: " +
+        (error.response?.data?.message || "")
+    );
+  }
+}
+
+// 댓글 삭제
+async function deleteComment(commentId) {
+  if (!confirm("정말 삭제하시겠습니까?")) return;
+  await api.delete(`/api/review/${commentId}`);
+  comments.value = comments.value.filter((c) => c.id !== commentId);
+}
+
+// 댓글 수정 시작
+function startEdit(comment) {
+  editingCommentId.value = comment.id;
+  editingContent.value = comment.text;
+}
+
+// 댓글 수정 취소
+function cancelEdit() {
+  editingCommentId.value = null;
+  editingContent.value = "";
+}
+
+// 댓글 수정 완료
+async function submitEdit(content) {
+  const commentId = editingCommentId.value;
+  try {
+    const res = await api.put(`/api/review/${commentId}`, {
+      reviewContent: content,
+      reviewId: commentId,
+    });
+    console.log("댓글 수정 응답:", res.data);
+    const target = comments.value.find((c) => c.id === commentId);
+    if (target) target.text = content;
+    editingCommentId.value = null;
+    editingContent.value = "";
+  } catch (error) {
+    console.error("댓글 수정 에러:", error.response?.data || error);
+    alert(
+      "댓글 수정 중 오류가 발생했습니다: " +
+        (error.response?.data?.message || "")
+    );
+  }
+}
+</script>
 <template>
   <div class="video-detail">
     <div class="video-area">
       <div class="video-thumb">
-        <img :src="videoCallIcon" alt="썸네일" />
+        <iframe
+          v-if="youtubeEmbedUrl"
+          width="100%"
+          height="340"
+          :src="youtubeEmbedUrl"
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        >
+        </iframe>
       </div>
       <div class="video-meta-bar">
-        <div class="video-title">{{ "OOOOO 영상" }}</div>
+        <div class="video-title">{{ videoTitle }}</div>
         <div class="video-stats-col">
           <span class="icon-wrap">
             <img :src="eyeIcon" alt="조회수" class="icon" />
             {{ views }}
           </span>
-          <span class="icon-wrap">
-            <img :src="heartIcon" alt="좋아요" class="icon" />
+          <span class="icon-wrap" @click="onLikeClick" style="cursor: pointer">
+            <img
+              :src="heartIcon"
+              alt="좋아요"
+              class="icon"
+              :style="{
+                filter: isLiked
+                  ? 'invert(33%) sepia(98%) saturate(7495%) hue-rotate(344deg) brightness(98%) contrast(105%)'
+                  : 'none',
+              }"
+            />
             {{ likes }}
           </span>
         </div>
       </div>
     </div>
     <hr class="divider" />
-
-    <ul class="comment-list">
-      <li
-        v-for="(comment, idx) in comments"
-        :key="comment.id"
-        class="comment-item"
-      >
-        <span class="comment-index">{{ idx + 1 }}.</span>
-        <span class="comment-text">{{ comment.text }}</span>
-        <span class="comment-actions">
-          <i class="fas fa-edit"></i> 수정
-          <i class="fas fa-trash" style="margin-left: 10px"></i> 삭제
-        </span>
-      </li>
-    </ul>
+    <CommentList
+      :comments="comments"
+      :myUserId="myUserId"
+      :editingCommentId="editingCommentId"
+      :editingContent="editingContent"
+      @startEdit="startEdit"
+      @cancelEdit="cancelEdit"
+      @submitEdit="submitEdit"
+      @deleteComment="deleteComment"
+    />
+    <CommentInput v-if="!editingCommentId" @submit="addComment" />    
   </div>
 </template>
 
@@ -150,12 +352,21 @@ import videoCallIcon from "@/assets/img/Video_Call.png";
 }
 .comment-actions {
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
-.comment-actions i {
-  margin-right: 2px;
+.action-link {
+  color: #666;
+  text-decoration: none;
+  cursor: pointer;
+}
+.action-link:hover {
+  color: #333;
+  text-decoration: underline;
+}
+.action-divider {
+  color: #ccc;
 }
 </style>

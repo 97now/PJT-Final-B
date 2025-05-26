@@ -5,8 +5,13 @@
 </template>
 
 <script setup>
-import VideoCard from './VideoCard.vue'
-const props = defineProps({ videos: Array })
+import { onMounted } from "vue";
+import VideoCard from "./VideoCard.vue";
+const props = defineProps({ videos: Array });
+
+onMounted(() =>
+  console.log("[VideoList] videos = " + JSON.stringify(props.videos))
+);
 </script>
 
 <style scoped>
@@ -20,6 +25,8 @@ const props = defineProps({ videos: Array })
   box-sizing: border-box;
 }
 @media (max-width: 700px) {
-  .videos { gap: 16px; }
+  .videos {
+    gap: 16px;
+  }
 }
 </style>

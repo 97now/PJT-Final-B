@@ -1,86 +1,124 @@
 <template>
-  <div>
-    <FollowListItem v-for="f in list" :key="f.id" :user="f" />
+  <div class="follow-list">
+    <FollowListItem
+      v-if="list.length !== 0"
+      v-for="f in list"
+      :key="f.userId"
+      :user="f"
+      @update-following-cnt="updateFollowingCnt"
+    />
+    <div
+      v-else-if="list.length === 0 && relation !== 'default'"
+      class="no-result"
+    >
+      <p v-if="relation === 'following'">팔로잉 목록이 없습니다</p>
+      <p v-else-if="relation === 'follower'">팔로워 목록이 없습니다</p>
+      <p v-else-if="relation === 'search'">
+        "{{ keyword }}"에 대한 검색 결과가 없습니다
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, onMounted, toRef, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 import FollowListItem from "@/components/user/FollowListItem.vue";
 
+const props = defineProps({
+  keyword: String,
+});
+
+const keyword = toRef(props, "keyword");
+
+const emit = defineEmits(["updateFollowingCnt"]);
+
+const userStore = useUserStore();
 const route = useRoute();
 const relation = computed(() => route.params.relation);
 
-const followerList = [
-  {
-    id: "o_oz97_",
-    statusMsg: "Hi, I'm Eonji",
-    isFollowed: true,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "97.now",
-    statusMsg: "Hi, I'm Hyunjae",
-    isFollowed: false,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "b_rkdnjs",
-    statusMsg: "Hi, I'm beautiful and gorgeous gawon",
-    isFollowed: false,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "j_yeoon_",
-    statusMsg: "플러팅 슈웃~!",
-    isFollowed: false,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "dojin9654",
-    statusMsg: "Hi, I love BL",
-    isFollowed: false,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "joohyun_0913",
-    statusMsg: "Hi, Watch your girlfriend dohyun",
-    isFollowed: false,
-    img: "@/assets/img/User.png",
-  },
-];
+const followingList = ref([]);
+const followerList = ref([]);
+const allUserList = ref([]);
 
-const followingList = [
-  {
-    id: "o_oz97_",
-    statusMsg: "Hi, I'm Eonji",
-    isFollowed: true,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "naninaniyoyoyoyo",
-    statusMsg: "MZ Girl",
-    isFollowed: true,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "sy_sysysy",
-    statusMsg: "Cute creatures save the world",
-    isFollowed: true,
-    img: "@/assets/img/User.png",
-  },
-  {
-    id: "peaceful.coco",
-    statusMsg: "Hi, I'm YeoMiSae",
-    isFollowed: true,
-    img: "@/assets/img/User.png",
-  },
-];
+const userId = userStore.userId;
+
+onMounted(async () => {
+  if (userId) {
+    followingList.value = await userStore.fetchFollowingList(userId);
+    followerList.value = await userStore.fetchFollowerList(userId);
+    allUserList.value = await userStore.fetchUserList();
+    // console.log("[FollowListView] allUserList = " + allUserList.value);
+  }
+});
+
+const updateFollowingCnt = async () => {
+  console.log("[FollowListView] updateUserInfo 호출");
+  followingList.value = await userStore.fetchFollowingList(userId);
+  followerList.value = await userStore.fetchFollowerList(userId);
+  console.log(
+    "[FollowListView] followingList 길이 : " + followingList.value.length
+  );
+  emit("updateFollowingCnt", followingList.value.length);
+};
 
 const list = computed(() => {
-  return relation.value === "follower" ? followerList : followingList;
+  if (relation.value === "follower") {
+    return followerList.value;
+  } else if (relation.value === "following") {
+    // console.log(JSON.stringify(followingList.value));
+    return followingList.value;
+  } else if (keyword.value && relation.value === "search") {
+    const searchResult = allUserList.value.filter((user) =>
+      user.userNickName.toLowerCase().includes(keyword.value.toLowerCase())
+    );
+
+    searchResult.forEach(async (user) => {
+      const isFollowed = await userStore.checkFollowed(user.userId);
+      user.checkFollowed = isFollowed;
+    });
+
+    // console.log(
+    //   "[FollowListView] searchResult = " + JSON.stringify(searchResult)
+    // );
+    return searchResult;
+  } else {
+    return [];
+  }
+});
+
+watch(keyword, async (newValue) => {
+  if (newValue && relation.value === "search") {
+    const searchResult = allUserList.value.filter((user) =>
+      user.userNickName.toLowerCase().includes(newValue.toLowerCase())
+    );
+
+    for (const user of searchResult) {
+      const isFollowed = await userStore.checkFollowed(user.userId);
+      user.checkFollowed = isFollowed;
+    }
+  }
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.follow-list {
+  padding: 20px;
+}
+
+.no-result {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+p {
+  padding: 20px;
+  text-align: center;
+  font-size: 20px;
+  color: #666;
+}
+</style>

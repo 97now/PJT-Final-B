@@ -3,19 +3,37 @@
     <img :src="searchIcon" alt="검색" class="search-icon" />
     <input
       type="text"
-      placeholder="검색어를 입력하시오."
+      :placeholder="placeholder"
       @input="onInput"
+      :value="searchValue"
     />
   </div>
 </template>
 
 <script setup>
-import searchIcon from '@/assets/img/Search.png'
+import searchIcon from "@/assets/img/Search.png";
+import { watch } from "vue";
 
-const emit = defineEmits(['search'])
+const searchValue = defineModel();
+
+const props = defineProps({
+  placeholder: String,
+});
+
+const emit = defineEmits(["search"]);
+
+let debounceTimer = null;
+
 function onInput(e) {
-  emit('search', e.target.value)
+  searchValue.value = e.target.value;
 }
+
+watch(searchValue, (newValue) => {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    emit("search", newValue);
+  }, 300);
+});
 </script>
 
 <style scoped>
@@ -31,7 +49,6 @@ function onInput(e) {
   padding: 8px 8px 6px 8px;
   margin-left: 10px;
   border: none;
-  border-bottom: 2px solid #000;
   outline: none;
   font-size: 17px;
   background: transparent;
@@ -48,6 +65,9 @@ function onInput(e) {
   vertical-align: middle;
 }
 @media (max-width: 700px) {
-  .search-bar input { width: 100%; min-width: 0; }
+  .search-bar input {
+    width: 100%;
+    min-width: 0;
+  }
 }
 </style>

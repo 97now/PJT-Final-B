@@ -3,13 +3,14 @@
     <ProfilePicture :img="imgUrl" alt="sadas" />
     <div class="userInfo">
       <p>
-        <strong>{{ user.id }}</strong>
+        <strong>{{ user.userNickName }}</strong>
       </p>
-      <p>{{ user.statusMsg }}</p>
+      <p>{{ user.userId }}</p>
     </div>
     <FollowButton
-      :value="user.isFollowed ? 'Following' : 'Follow'"
-      :is-followed="user.isFollowed"
+      :style="{ visibility: userId === user.userId ? 'hidden' : 'visible' }"
+      :value="user.checkFollowed ? 'Following' : 'Follow'"
+      :is-followed="user.checkFollowed"
       @toggle-follow="onToggleFollow(user)"
     />
   </div>
@@ -19,17 +20,34 @@
 import { ref } from "vue";
 import ProfilePicture from "../common/ProfilePicture.vue";
 import FollowButton from "../common/FollowButton.vue";
+import { useUserStore } from "@/stores/userStore";
+
+const userStore = useUserStore();
+
+const userId = userStore.userId;
 
 const imgUrl = ref("/User.png");
 const prop = defineProps({
   user: Object,
 });
+const emit = defineEmits(["updateFollowingCnt"]);
 
-const onToggleFollow = (user) => {
+const onToggleFollow = async (user) => {
   console.log(
-    "지금은 버튼만 바뀌는데 나중에 실제 팔로우 데이터에서 추가하고 삭제하는 로직 구현해야 함"
+    "[FollowListItem] onToggleFollow 호출, targetId = " + user.userId
   );
-  user.isFollowed = !user.isFollowed;
+
+  try {
+    if (!user.checkFollowed) {
+      await userStore.followUser(user.userId);
+    } else {
+      await userStore.unfollowUser(user.userId);
+    }
+    user.checkFollowed = !user.checkFollowed;
+    emit("updateFollowingCnt");
+  } catch {
+    console.error("팔로우 처리 중 오류 발생: ", error);
+  }
 };
 </script>
 

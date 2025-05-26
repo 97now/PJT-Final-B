@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface FollowService {
     // 팔로우하기
-    void followAdd(Follow follow);
+    void followAdd(String followerId, String followeeId);
 
     // 내가 팔로우 한 목록 조회
     List<User> getFollowingList(String userId);

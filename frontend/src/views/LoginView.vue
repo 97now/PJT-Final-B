@@ -22,22 +22,38 @@
         <router-link :to="{ name: 'findPw' }">비밀번호 찾기</router-link>
       </nav>
 
-      <BaseButton type="submit" text="로그인" :action="onSubmit" />
+      <BaseButton type="submit" text="로그인" />
     </form>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
+import { useUserStore } from "@/stores/userStore";
 import BaseInput from "@/components/common/BaseInput.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
+
+const userStore = useUserStore();
+const router = useRouter();
 
 const loginId = ref("");
 const loginPw = ref("");
 
-const onSubmit = () => {
-  console.log("onSubmit 호출 : 로그인 로직 만들어야 됨");
+const onSubmit = async () => {
+  const loginData = {
+    userId: loginId.value,
+    userPw: loginPw.value,
+  };
+  try {
+    await userStore.login(loginData);
+    alert("로그인 성공 😎");
+    console.log("[loginView] token = " + userStore.token);
+    router.push("/");
+  } catch (error) {
+    const errorMsg = userStore.error || "로그인 중 오류가 발생했습니다.";
+    alert(errorMsg);
+  }
 };
 </script>
 
