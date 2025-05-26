@@ -4,8 +4,8 @@ import com.ssafy.pjtFinal.interceptor.SessionInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     // interceptor 의존성 주입
     private SessionInterceptor sessionInterceptor;
+
     @Autowired
     public WebConfig(SessionInterceptor sessionInterceptor) {
         this.sessionInterceptor = sessionInterceptor;
@@ -29,6 +30,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/user/login"    // 로그인
                 );
     }
+
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/upload/**")
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/upload/");
+    }
+
 
     // spring security 쓸 거면 SecurityConfig에 넣는 게 맞대
 //    @Override

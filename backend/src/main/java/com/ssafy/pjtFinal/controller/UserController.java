@@ -7,6 +7,7 @@ import com.ssafy.pjtFinal.model.service.UserService;
 import com.ssafy.pjtFinal.security.JwtUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,25 +19,20 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
-    public UserController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserService userService, PasswordEncoder passwordEncoder) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     // 유저 등록
     @PostMapping
@@ -44,6 +40,20 @@ public class UserController {
         userService.userAdd(user);
         URI location = URI.create("/api/user/" + user.getUserId());
         return ResponseEntity.created(location).body(user);
+    }
+
+    // 프로필 사진 등록
+    @PostMapping("/uploadProfile")
+    public ResponseEntity<String> uploadProfile(@AuthenticationPrincipal UserDetails userDetails, @RequestParam("file")MultipartFile file) {
+        System.out.println("[UserController] uploadProfile 호출");
+        
+        String userId = userDetails.getUsername();
+        try{
+            String savedPath = userService.saveProfileImage(file, userId);
+            return ResponseEntity.ok(savedPath);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
+        }
     }
 
     // 로그인
@@ -60,7 +70,7 @@ public class UserController {
             String token = jwtUtil.generateToken(request.getUserId());
             return ResponseEntity.ok(new LoginResponse(token, request.getUserId()));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호 틀림 😕");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패 😕");
         }
     }
 
