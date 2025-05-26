@@ -53,6 +53,13 @@
         WHERE user_id=#{userId}
     </update>
 
+    <!-- 프로필 사진 업로드 -->
+    <update id="updateProfileImg">
+        UPDATE user SET
+        profile_img = #{fileUrl}
+        WHERE user_id = #{userId}
+    </update>
+
     <!--유저 삭제-->
     <delete id="userDelete" parameterType="String">
         DELETE FROM user
