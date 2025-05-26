@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService{
     // 로그인
     @Override
     public User userLogin(LoginRequest request) {
+        System.out.println("[UserServiceImpl] 로그인 함수 호출");
         User user = getUserOne(request.getUserId());
         if(user == null) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
@@ -107,5 +108,12 @@ public class UserServiceImpl implements UserService{
     @Transactional
     public void userRemove(String userId) {
         userDao.userDelete(userId);
+    }
+
+    // 비밀번호 인증
+    @Override
+    public boolean verifyPassword(LoginRequest request) {
+        User user = userDao.userSelectOne(request.getUserId());
+        return passwordEncoder.matches(request.getUserPw(), user.getUserPw());
     }
 }

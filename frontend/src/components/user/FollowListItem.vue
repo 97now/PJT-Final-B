@@ -8,7 +8,7 @@
       <p>{{ user.userId }}</p>
     </div>
     <FollowButton
-      v-if="userId !== user.userId"
+      :style="{ visibility: userId === user.userId ? 'hidden' : 'visible' }"
       :value="user.checkFollowed ? 'Following' : 'Follow'"
       :is-followed="user.checkFollowed"
       @toggle-follow="onToggleFollow(user)"

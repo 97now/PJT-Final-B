@@ -54,6 +54,8 @@ export const useUserStore = defineStore("user", {
 
     // 로그인
     async login(loginData) {
+      console.log("[userStore.js] 로그인 함수 호출, loginData = ", loginData);
+
       try {
         const response = await api.post(
           "http://localhost:8080/api/user/login",
@@ -69,7 +71,9 @@ export const useUserStore = defineStore("user", {
         console.log("[userStore.js] 로그인 후 userId = " + this.userId);
       } catch (error) {
         const msg =
-          error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
+          typeof error.response?.data === "string"
+            ? error.response.data
+            : error.response?.data?.message || "로그인 중 오류가 발생했습니다.";
         this.error = msg;
         throw error;
       }
@@ -190,8 +194,38 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    // 비밀번호 인증
+    async verifyPassword(userData) {
+      // console.log(
+      //   "[userStore.js] 비밀번호 인증 함수 호출, userData = " +
+      //     JSON.stringify(userData)
+      // );
+
+      try {
+        const response = await api.post(
+          `http://localhost:8080/api/user/verifyPw`,
+          userData
+        );
+
+        // console.log(
+        //   "[userStore.js] 비밀번호 인증 함수 결과 = " + response.data
+        // );
+
+        return response.data;
+      } catch (error) {
+        this.error =
+          error.response?.data.message ||
+          "비밀번호 인증 처리 중 오류가 발생했습니다";
+      }
+    },
+
     // 사용자 정보 수정
     async updateUser(userId, userData) {
+      console.log(
+        "[userStore.js] 사용자 정보 수정 함수 호출, userData = ",
+        userData
+      );
+
       try {
         const response = await api.put(
           `http://localhost:8080/api/user/${userId}`,

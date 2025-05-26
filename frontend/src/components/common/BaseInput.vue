@@ -2,12 +2,11 @@
   <div class="input-wrapper">
     <div class="inputArea">
       <input
+        v-model="modelValue"
         :id="id"
         :type="type"
         :placeholder="placeholder"
-        :value="modelValue"
-        @input="onInput"
-        required
+        :required="required"
       />
     </div>
   </div>
@@ -18,14 +17,16 @@ const props = defineProps([
   "id",
   "type",
   "placeholder",
-  "modelValue", // v-model의 입력값
+  "required",
+  // "modelValue", // v-model의 입력값
 ]);
 
-const emit = defineEmits(["update:modelValue"]); // v-model용 이벤트
+const modelValue = defineModel();
+// const emit = defineEmits(["update:modelValue"]); // v-model용 이벤트
 
-const onInput = (e) => {
-  emit("update:modelValue", e.target.value);
-};
+// const onInput = (e) => {
+//   emit("update:modelValue", e.target.value);
+// };
 </script>
 
 <style scoped>

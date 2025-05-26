@@ -26,4 +26,7 @@ public interface UserService {
     void userModify(User user);
     // 유저 삭제
     void userRemove(String userId);
+
+    // 비밀번호 인증
+    boolean verifyPassword(LoginRequest request);
 }

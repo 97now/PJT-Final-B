@@ -1,39 +1,38 @@
 <template>
-  <div class="user-form">
+  <div v-if="!authorized" class="user-form">
     <div class="page-title">
-      <h1>회원가입</h1>
+      <h1>비밀번호 인증</h1>
+    </div>
+    <form @submit.prevent="onAuthorize" class="input">
+      <label for="pw-auth">비밀번호</label>
+      <BaseInput
+        v-model="authPw"
+        type="password"
+        id="pw-auth"
+        placeholder="회원정보에 등록된 비밀번호를 입력해주세요"
+        :required="true"
+      />
+      <BaseButton class="authorizeBtn" text="인증하기" />
+    </form>
+  </div>
+
+  <div v-else class="user-form">
+    <div class="page-title">
+      <h1>회원 정보 수정</h1>
     </div>
     <form @submit.prevent="onSubmit">
       <div class="input">
-        <label for="id">아이디</label>
-        <div class="idInput">
-          <BaseInput
-            type="text"
-            id="id"
-            placeholder="아이디를 입력해주세요 (영어 소문자 또는 숫자 8~20자)"
-            v-model="userId"
-            :required="true"
-          />
-          <button @click.prevent="checkDuplicatedId">중복 확인</button>
-        </div>
-        <p
-          :class="{
-            errorMsg: idErrorMsg,
-            availableMsg: isValidId && isIdChecked,
-          }"
-          v-if="idErrorMsg"
-        >
-          {{ idErrorMsg }}
-        </p>
+        <label>아이디</label>
+        <span class="fixed">{{ userId }}</span>
       </div>
       <div class="input">
-        <label for="pw">비밀번호</label>
+        <label for="pw">새 비밀번호</label>
         <BaseInput
           type="password"
           id="pw"
           placeholder="비밀번호를 입력해주세요 (문자, 숫자, 특수문자 포함 8~20자)"
           v-model="userPw"
-          :required="true"
+          :required="false"
         />
         <p :class="{ errorMsg: !isValidPw }" v-if="pwErrorMsg">
           {{ pwErrorMsg }}
@@ -46,7 +45,7 @@
           id="pwCheck"
           placeholder="비밀번호를 재입력해주세요"
           v-model="userPwCheck"
-          :required="true"
+          :required="false"
         />
         <p
           :class="{
@@ -65,7 +64,6 @@
           id="name"
           placeholder="닉네임을 입력해주세요"
           v-model="userName"
-          :required="true"
         />
       </div>
       <div class="input">
@@ -75,7 +73,6 @@
           id="phone"
           placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
           v-model="userPhone"
-          :required="true"
           @input="restrictPhoneInput"
         />
         <p :class="{ errorMsg: !isValidPhone }" v-if="phoneErrorMsg">
@@ -90,7 +87,6 @@
             id="email"
             placeholder="이메일 아이디"
             v-model="userEmail"
-            :required="true"
           />
           @
           <BaseInput
@@ -98,7 +94,6 @@
             id="emailDomain"
             placeholder="도메인 입력"
             v-model="userEmailDomain"
-            :required="true"
           />
           <EmailDomainDropbox v-model="userEmailDomain" />
         </div>
@@ -113,20 +108,13 @@
             :options="years"
             v-model="birthYear"
             placeholder="연도"
-            :required="true"
           />
           <BaseDropBox
             :options="months"
             v-model="birthMonth"
             placeholder="월"
-            :required="true"
           />
-          <BaseDropBox
-            :required="true"
-            :options="days"
-            v-model="birthDay"
-            placeholder="일"
-          />
+          <BaseDropBox :options="days" v-model="birthDay" placeholder="일" />
         </div>
       </div>
       <BaseButton type="submit" text="가입하기" />
@@ -135,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import { useRouter } from "vue-router";
 import BaseInput from "@/components/common/BaseInput.vue";
@@ -146,8 +134,10 @@ import BaseDropBox from "@/components/common/BaseDropBox.vue";
 const userStore = useUserStore();
 const router = useRouter();
 
+const userId = userStore.userId;
+const user = ref(null);
+
 // 담아줄 데이터
-const userId = ref("");
 const userPw = ref("");
 const userPwCheck = ref("");
 const userName = ref("");
@@ -164,88 +154,58 @@ const months = Array.from({ length: 12 }, (_, i) => i + 1);
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
 // 유효성 검사 결과
-const isValidId = ref(false); // 아이디 정규식 검사
-const isIdChecked = ref(false); // 아이디 중복확인 완료 여부 검사
 const isValidPw = ref(false); // 비밀번호 정규식 검사
 const isSamePw = ref(true); // 비밀번호 확인란 일치 여부 검사
 const isValidPhone = ref(false); // 휴대폰 번호 정규식 검사
 const isValidEmail = ref(false); // 이메일 번호 정규식 검사
 
 // 결과 메시지
-const idErrorMsg = ref("");
 const pwErrorMsg = ref("");
 const pwCheckErrorMsg = ref("");
 const phoneErrorMsg = ref("");
 const emailErrorMsg = ref("");
 
-/* Validation 함수 */
-// 아이디 정규식 검사
-const idValidationCheck = () => {
-  const idReg = /^[a-z0-9]{8,20}$/;
-  if (!userId.value) {
-    // id 입력값 없는 경우
-    idErrorMsg.value = "아이디를 입력해주세요.";
-    isValidId.value = false;
-  } else if (!idReg.test(userId.value)) {
-    // id 입력값은 있지만 정규식과 일치하지 않는 경우
-    idErrorMsg.value =
-      "아이디는 영어 소문자와 숫자로 구성된 8~20자리 문자열이어야 합니다.";
-    isValidId.value = false;
-  } else {
-    // 정규식 일치하는 입력값인 경우
-    idErrorMsg.value = "사용 가능한 아이디입니다";
-    isValidId.value = true;
-  }
-};
-
-// 아이디 입력값 변경 감지
-watch(userId, () => {
-  isIdChecked.value = false; // 아이디가 변경되면 중복 확인 상태 초기화
-  idErrorMsg.value = "";
+// 초기값 세팅
+onMounted(async () => {
+  user.value = await userStore.fetchUserInfo(userId);
+  userName.value = user.value.userNickName;
+  userPhone.value = user.value.userPhone;
+  const userEmailArray = user.value.userEmail.split("@");
+  userEmail.value = userEmailArray[0];
+  userEmailDomain.value = userEmailArray[1];
+  const userBirthArray = user.value.userBirth.split("-");
+  birthYear.value = userBirthArray[0];
+  birthMonth.value = Number(userBirthArray[1]);
+  birthDay.value = Number(userBirthArray[2]);
 });
 
-// 아이디 중복 확인
-const checkDuplicatedId = async () => {
-  if (!userId.value) {
-    // 아이디 입력값 없는 경우
-    idErrorMsg.value = "아이디를 입력해주세요.";
-    isIdChecked.value = false;
-    isValidId.value = false;
-    return;
-  }
+// 비밀번호 인증
+const authorized = ref(false);
+const authPw = ref("");
 
-  // 입력값 있으면 정규식 검사
-  idValidationCheck();
-  if (!isValidId.value) {
-    // 정규식과 일치하지 않으면 false 반환
-    isIdChecked.value = false;
-    isValidId.value = false;
-    return;
-  }
+const onAuthorize = async () => {
+  const userData = {
+    userId,
+    userPw: authPw.value,
+  };
+  const result = await userStore.verifyPassword(userData);
 
-  // 중복 검사
-  try {
-    // userStore의 중복 검사 실행해서 넘어온 responst를 result에 담아줌
-    const result = await userStore.checkDuplicatedId(userId.value);
-    idErrorMsg.value = result.message;
-    isValidId.value = !result.isDuplicated;
-  } catch (error) {
-    // 오류 발생
-    idErrorMsg.value = "아이디 중복 확인 중 오류가 발생했습니다.";
-    isValidId.value = false;
-    isIdChecked.value = false;
+  if (result) {
+    authorized.value = true;
+  } else {
+    authorized.value = false;
+    alert("비밀번호 인증 실패");
+    router.replace({ name: "myPage", params: { userId } });
   }
-
-  isIdChecked.value = true;
 };
 
+/* Validation 함수 */
 // 비밀번호 정규식 검사
 const pwValidationCheck = () => {
   const pwReg = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\W_]).{8,20}$/;
   if (!userPw.value) {
-    pwErrorMsg.value = "비밀번호를 입력해주세요";
     isValidPw.value = false;
-  } else if (!pwReg.test(userPw.value)) {
+  } else if (userPw.value && !pwReg.test(userPw.value)) {
     isValidPw.value = false;
     pwErrorMsg.value =
       "비밀번호는 문자, 숫자, 특수문자를 포함한 8~20자로 입력해주세요";
@@ -278,7 +238,7 @@ const pwSameCheck = (checking) => {
   if (userPwCheck.value && checking !== userPw.value) {
     isSamePw.value = false;
     pwCheckErrorMsg.value = "비밀번호가 일치하지 않습니다.";
-  } else if (checking === userPw.value) {
+  } else if (userPw.value && checking === userPw.value) {
     isSamePw.value = true;
     pwCheckErrorMsg.value = "비밀번호가 일치합니다.";
   } else {
@@ -334,23 +294,15 @@ const emailValidationCheck = () => {
 
 // 제출
 const onSubmit = async () => {
-  if (!isIdChecked.value) {
-    idErrorMsg.value = "아이디 중복검사를 해주세요";
-    return;
-  }
-
-  idValidationCheck();
   phoneValidationCheck();
   emailValidationCheck();
 
   if (
-    !isValidId.value ||
-    !isValidPw.value ||
+    (userPw.value && !isValidPw.value) ||
     !isSamePw.value ||
     !isValidPhone.value ||
     !isValidEmail.value
   ) {
-    console.log("isValidId : " + isValidId.value + " " + idErrorMsg.value);
     console.log("isValidPw : " + isValidPw.value + " " + pwErrorMsg.value);
     console.log("isSamePw : " + isSamePw.value + " " + pwCheckErrorMsg.value);
     console.log(
@@ -363,8 +315,8 @@ const onSubmit = async () => {
   }
 
   const user = {
-    userId: userId.value.trim(),
-    userPw: userPw.value.trim(),
+    userId: userId,
+    userPw: userPw.value ? userPw.value.trim() : authPw.value,
     userNickName: userName.value.trim(),
     userEmail: `${userEmail.value.trim()}@${userEmailDomain.value.trim()}`,
     userPhone: userPhone.value.trim(),
@@ -375,11 +327,12 @@ const onSubmit = async () => {
   };
 
   try {
-    await userStore.register(user);
-    alert("회원가입 성공 ⭐");
+    await userStore.updateUser(userId, user);
+    alert("회원 정보 수정 완료 >< !!!");
+    userStore.logout();
     router.push("/login");
   } catch (error) {
-    alert("회원가입 중 오류 발생ㅠㅠ");
+    alert("회원 정보 수정 중 오류 발생 ;ㅅ;");
   }
 };
 </script>
@@ -413,29 +366,6 @@ form {
   color: blue;
 }
 
-.idInput {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  align-items: center;
-}
-
-.idInput button {
-  width: 100px;
-  margin-top: 10px;
-  padding: 12px 0px;
-  background-color: #aaa;
-  border: none;
-  border-radius: 5px;
-  box-shadow: 1px 1px 2px #ccc;
-  font-weight: bold;
-}
-
-.idInput button:hover {
-  background-color: #808080;
-  cursor: pointer;
-}
-
 .emailInput {
   display: flex;
   align-items: center;
@@ -453,5 +383,9 @@ form {
 .birth {
   display: flex;
   gap: 10px;
+}
+
+.authorizeBtn {
+  margin-top: 20px;
 }
 </style>

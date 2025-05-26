@@ -1,19 +1,27 @@
 <template>
   <div class="my-page-view" v-if="user">
-    <div class="myInfo">
-      <ProfilePicture
-        :img="imgUrl"
-        alt="내 프로필 이미지"
-        @click="goToDefault"
-        style="cursor: pointer"
-      />
-      <div class="nickname" @click="goToDefault" style="cursor: pointer">
-        <p>{{ user.userNickName }}</p>
+    <div class="myInfo-container">
+      <div class="myInfo">
+        <ProfilePicture
+          :img="imgUrl"
+          alt="내 프로필 이미지"
+          @click="goToDefault"
+          style="cursor: pointer"
+        />
+        <div class="nickname" @click="goToDefault" style="cursor: pointer">
+          <p>{{ user.userNickName }}</p>
+        </div>
+      </div>
+      <div class="modify-info-btn">
+        <RouterLink :to="{ name: 'modifyUserInfo', params: { userId } }"
+          >회원정보수정</RouterLink
+        >
       </div>
     </div>
 
     <!-- 유저 검색 -->
     <SearchBar
+      class="searchBar"
       v-model="searchKeyword"
       @search="onSearch"
       placeholder="닉네임을 입력하세요"
@@ -120,13 +128,35 @@ function goToFollower() {
   width: 100%;
 }
 
+.myInfo-container {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  width: 100%;
+  position: relative;
+  left: 55px;
+}
+
 .myInfo {
   margin-top: 20px;
   height: 50px;
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.modify-info-btn {
+  padding: 10px;
+  margin-left: 25px;
+  border-radius: 10px;
+  line-height: 100%;
+  position: relative;
+  bottom: 12px;
+}
+
+.modify-info-btn a {
+  text-decoration: none;
+  color: black;
 }
 
 .nickname {
@@ -144,16 +174,22 @@ function goToFollower() {
   font-size: 1.5rem;
 }
 
+.searchBar {
+  background-color: #eee;
+  padding: 3px 25px;
+  width: fit-content;
+  justify-self: center;
+  border-radius: 10px;
+}
+
 .follow {
   display: flex;
   padding: 0px 60px;
   justify-content: space-between;
   height: 40px;
   align-items: end;
-  background-color: #eee;
-  border-radius: 10px;
   align-items: center;
-  /* border-bottom: 3px solid #7e7e7e; */
+  border-bottom: 3px solid #7e7e7e;
   margin: 20px 0px;
 }
 

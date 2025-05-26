@@ -10,6 +10,7 @@ import ResetPwView from "@/views/ResetPwView.vue";
 import FollowListView from "@/views/FollowListView.vue";
 import MyPageView from "@/views/MyPageView.vue";
 import VideoDetailView from "@/views/VideoDetailView.vue";
+import ModifyUserInfoView from "@/views/ModifyUserInfoView.vue";
 
 const routes = [
   {
@@ -60,6 +61,11 @@ const routes = [
       },
     ],
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/:userId/modifyUserInfo",
+    name: "modifyUserInfo",
+    component: ModifyUserInfoView,
   },
   {
     path: "/:videoId/detail",
