@@ -133,6 +133,9 @@ public class UserServiceImpl implements UserService{
         // 업로드 디렉토리 생성
         String uploadDir = System.getProperty("user.dir") + "/upload/";
 
+        // 기존파일 삭제
+        deleteProfileImage(userId);
+
         File dir = new File(uploadDir);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -152,4 +155,21 @@ public class UserServiceImpl implements UserService{
 
         return fileUrl;
     }
+
+    // 프로필 사진 삭제
+    @Override
+    public void deleteProfileImage(String userId) {
+        String uploadDir = System.getProperty("user.dir") + "/upload/";
+        User user = userDao.userSelectOne(userId);
+
+        String curImg = user.getProfileImg();
+        if(curImg != null && !curImg.equals("/upload/User.png")) {
+            File oldFile = new File(uploadDir + curImg.substring(curImg.lastIndexOf("/") + 1));
+            if(oldFile.exists()) oldFile.delete();
+        }
+
+        userDao.updateProfileImg(userId, "/upload/User.png");
+    }
+
+
 }

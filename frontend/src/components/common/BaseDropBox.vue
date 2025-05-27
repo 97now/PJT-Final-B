@@ -17,7 +17,7 @@ defineProps({
   modelValue: [String, Number],
   options: Array,
   placeholder: String,
-  required: String,
+  required: Boolean,
 });
 defineEmits(["update:modelValue"]);
 </script>

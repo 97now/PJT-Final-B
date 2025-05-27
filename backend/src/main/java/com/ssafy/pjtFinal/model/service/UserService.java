@@ -34,4 +34,7 @@ public interface UserService {
 
     // 프로필 사진 업로드
     String saveProfileImage(MultipartFile file, String userId) throws IOException;
+
+    // 프로필 사진 삭제
+    void deleteProfileImage(String userId);
 }

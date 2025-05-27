@@ -3,7 +3,7 @@
     <div class="myInfo-container">
       <div class="myInfo">
         <ProfilePicture
-          :img="`http://localhost:8080${user.profileImg}`"
+          :img="`${userStore.profileImg}`"
           alt="내 프로필 이미지"
           style="cursor: pointer"
         />
@@ -17,10 +17,6 @@
           :to="{ name: 'modifyUserInfo', params: { userId } }"
           >회원정보수정</RouterLink
         >
-        <ImgUploadForm
-          @changeProfileImg="onChangeProfileImg"
-          class="modify-info-btn-item"
-        />
       </div>
     </div>
 
@@ -70,7 +66,6 @@ import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
 import SearchBar from "@/components/common/SearchBar.vue";
-import ImgUploadForm from "@/components/common/ImgUploadForm.vue";
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -83,7 +78,10 @@ const user = ref(null);
 // 유저 정보 초기값
 onMounted(async () => {
   user.value = await userStore.fetchUserInfo(userId.value);
-  // console.log("로그인된 유저 : " + user.value);
+  console.log("[MyPageView] 로그인된 유저 : ", user.value);
+  console.log(
+    "[MyPageView] 로그인된 유저 프로필 이미지 : " + userStore.profileImg
+  );
 });
 
 // 프로필 사진 업로드
@@ -127,10 +125,12 @@ function goToDefault() {
 }
 
 function goToFollowing() {
+  searchKeyword.value = "";
   router.push(`/${userId.value}/myPage/follow-list/following`);
 }
 
 function goToFollower() {
+  searchKeyword.value = "";
   router.push(`/${userId.value}/myPage/follow-list/follower`);
 }
 </script>
@@ -146,7 +146,6 @@ function goToFollower() {
   align-items: baseline;
   width: 100%;
   position: relative;
-  left: 95px;
   gap: 20px;
 }
 
@@ -158,15 +157,11 @@ function goToFollower() {
   align-items: center;
 }
 
-.modify-info-btn {
-  display: flex;
-}
-
 .modify-info-btn a {
   padding: 7px;
   border-radius: 5%;
   position: relative;
-  bottom: 12px;
+  bottom: 20px;
   display: inline-block;
   text-decoration: none;
   color: black;

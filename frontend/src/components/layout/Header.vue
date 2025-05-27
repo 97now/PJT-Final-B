@@ -3,24 +3,36 @@
     <div class="header-title">
       <router-link to="/">SSAFIT</router-link>
     </div>
+    <!-- 로그인 안 돼 있을 때 -->
     <nav v-if="!token" class="header-actions">
+      <!-- 회원가입 -->
       <i class="fas fa-user header-icon"></i>
       <img :src="adduserIcon" alt="signup" class="icon" />
       <router-link :to="{ name: 'signUp' }" class="header-link"
         >sign up</router-link
       >
+
       <i class="fas fa-sign-in-alt header-icon" style="margin-left: 18px"></i>
       <img :src="loginIcon" alt="login" class="icon" />
       <router-link :to="{ name: 'logIn' }" class="header-link"
         >login</router-link
       >
     </nav>
+    <!-- 로그인 돼 있을 때 -->
     <nav v-else class="header-actions">
+      <!-- 로그아웃 -->
       <img :src="logoutIcon" alt="signup" class="icon" />
       <router-link to="/" @click="logout" class="header-link"
         >logout</router-link
       >
-      <img :src="userIcon" alt="signup" class="icon" />
+
+      <!-- 마이 페이지 -->
+      <img
+        v-if="profileImg"
+        :src="profileImg"
+        alt="signup"
+        class="icon profile-img"
+      />
       <router-link
         class="header-link"
         :to="{
@@ -40,13 +52,21 @@ import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
 import adduserIcon from "@/assets/img/Add_User.png";
-import userIcon from "@/assets/img/User.png";
 import loginIcon from "@/assets/img/Login.png";
 import logoutIcon from "@/assets/img/Logout.png";
 
 const userStore = useUserStore();
+const { token, profileImg } = storeToRefs(userStore);
 
-const { token } = storeToRefs(userStore);
+const user = ref(null);
+
+watch(token, (newVal) => {
+  if (newVal) {
+    userStore.fetchUserInfo(userStore.userId).then((res) => {
+      user.value = res.data;
+    });
+  }
+});
 
 const logout = () => {
   userStore.logout();
@@ -106,5 +126,12 @@ const logout = () => {
   border: none;
   border-bottom: 2px solid #bbb;
   width: 100%;
+}
+
+.profile-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  border: 2px solid #ccc;
 }
 </style>
