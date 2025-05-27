@@ -50,36 +50,34 @@
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
-import { ref, watch } from "vue";
+// import { ref, watch } from "vue";
 
 import adduserIcon from "@/assets/img/Add_User.png";
 import loginIcon from "@/assets/img/Login.png";
 import logoutIcon from "@/assets/img/Logout.png";
 
 const userStore = useUserStore();
-const { token, profileImg, userId } = storeToRefs(userStore);
-
-const user = ref(null);
+const { token, profileImg, userId, user } = storeToRefs(userStore);
 
 const logout = () => {
   userStore.logout();
   console.log("[Header] 토큰 : " + token.value);
 };
 
-watch(
-  [token, userId],
-  async ([newToken, newUserId]) => {
-    // console.log("[Header] newUserId = " + newUserId);
+// watch(
+//   [token, user],
+//   async ([newToken, newUser]) => {
+//     // console.log("[Header] newUserId = " + newUserId);
 
-    if (newToken && newUserId) {
-      user.value = await userStore.fetchUserInfo(newUserId);
-      // console.log("[Header] 유저 정보 : " + JSON.stringify(user.value));
-    } else {
-      user.value = null;
-    }
-  },
-  { immediate: true }
-);
+//     if (newToken && newUser) {
+//       user.value = await userStore.fetchUserInfo(newUser);
+//       // console.log("[Header] 유저 정보 : " + JSON.stringify(user.value));
+//     } else {
+//       user.value = null;
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>
 
 <style scoped>

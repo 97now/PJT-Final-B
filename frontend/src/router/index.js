@@ -66,6 +66,7 @@ const routes = [
     path: "/:userId/modifyUserInfo",
     name: "modifyUserInfo",
     component: ModifyUserInfoView,
+    meta: { requiresAuth: true },
   },
   {
     path: "/:videoId/detail",
