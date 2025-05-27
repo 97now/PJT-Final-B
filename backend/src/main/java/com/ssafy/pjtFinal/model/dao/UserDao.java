@@ -18,4 +18,6 @@ public interface UserDao {
     Integer findPw(FindPwRequest request);
 
     void resetPw(ResetPwRequest request);
+
+    void updateProfileImg(@Param("userId") String userId, @Param("fileUrl") String fileUrl);
 }

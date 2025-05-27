@@ -10,7 +10,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -115,5 +118,38 @@ public class UserServiceImpl implements UserService{
     public boolean verifyPassword(LoginRequest request) {
         User user = userDao.userSelectOne(request.getUserId());
         return passwordEncoder.matches(request.getUserPw(), user.getUserPw());
+    }
+
+    // 프로필 사진 업로드
+    @Override
+    public String saveProfileImage(MultipartFile file, String userId) throws IOException {
+        System.out.println("[UserServiceImpl] saveProfileImage 호출, file = " + file + ", userId = " + userId);
+
+        if(file.isEmpty()) throw new IOException("파일이 비어있습니다");
+
+        String originalName = file.getOriginalFilename();
+        String fileName = System.currentTimeMillis() + "_" + userId + "_" + originalName;
+
+        // 업로드 디렉토리 생성
+        String uploadDir = System.getProperty("user.dir") + "/upload/";
+
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File dest = new File(dir, fileName);
+        System.out.println("[UserServiceImpl] 파일 저장 위치 = " + dest.getAbsolutePath());
+
+        try {
+            file.transferTo(dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        String fileUrl = "/upload/" + fileName;
+        userDao.updateProfileImg(userId, fileUrl);
+
+        return fileUrl;
     }
 }

@@ -3,9 +3,8 @@
     <div class="myInfo-container">
       <div class="myInfo">
         <ProfilePicture
-          :img="imgUrl"
+          :img="`http://localhost:8080${user.profileImg}`"
           alt="내 프로필 이미지"
-          @click="goToDefault"
           style="cursor: pointer"
         />
         <div class="nickname" @click="goToDefault" style="cursor: pointer">
@@ -13,9 +12,15 @@
         </div>
       </div>
       <div class="modify-info-btn">
-        <RouterLink :to="{ name: 'modifyUserInfo', params: { userId } }"
+        <RouterLink
+          class="modify-info-btn-item"
+          :to="{ name: 'modifyUserInfo', params: { userId } }"
           >회원정보수정</RouterLink
         >
+        <ImgUploadForm
+          @changeProfileImg="onChangeProfileImg"
+          class="modify-info-btn-item"
+        />
       </div>
     </div>
 
@@ -65,6 +70,7 @@ import ProfilePicture from "@/components/common/ProfilePicture.vue";
 import LikeVideoView from "@/views/LikeVideoView.vue";
 import FollowListView from "@/views/FollowListView.vue";
 import SearchBar from "@/components/common/SearchBar.vue";
+import ImgUploadForm from "@/components/common/ImgUploadForm.vue";
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -73,14 +79,20 @@ const router = useRouter();
 const { userId } = storeToRefs(userStore);
 
 const user = ref(null);
-const imgUrl = ref("/User.png");
 
+// 유저 정보 초기값
 onMounted(async () => {
   user.value = await userStore.fetchUserInfo(userId.value);
-  // console.log("로그인된 유저 : " + userId.value);
-  console.log(user.value);
+  // console.log("로그인된 유저 : " + user.value);
 });
 
+// 프로필 사진 업로드
+const onChangeProfileImg = async () => {
+  console.log("[MyPageView] onChangeProfileImg 호출");
+  user.value = await userStore.fetchUserInfo(userId.value);
+};
+
+// 팔로잉 숫자 갱신
 const onUpdateFollowingCnt = (newVal) => {
   console.log("[MyPageView] onUpdateUserInfo 호출");
   user.value.followingCnt = newVal;
@@ -100,7 +112,7 @@ const onSearch = (keyword) => {
   }
 };
 
-// 보여줄 내용 구분
+// 보여줄 리스트 구분
 const currentView = computed(() => {
   const relation = route.params.relation;
   if (searchKeyword.value.trim()) {
@@ -134,7 +146,8 @@ function goToFollower() {
   align-items: baseline;
   width: 100%;
   position: relative;
-  left: 55px;
+  left: 95px;
+  gap: 20px;
 }
 
 .myInfo {
@@ -146,24 +159,25 @@ function goToFollower() {
 }
 
 .modify-info-btn {
-  padding: 10px;
-  margin-left: 25px;
-  border-radius: 10px;
-  line-height: 100%;
-  position: relative;
-  bottom: 12px;
+  display: flex;
 }
 
 .modify-info-btn a {
+  padding: 7px;
+  border-radius: 5%;
+  position: relative;
+  bottom: 12px;
+  display: inline-block;
   text-decoration: none;
   color: black;
+  box-shadow: 0px 0px 1px 0.8px #7e7e7e;
+  font-size: small;
 }
 
 .nickname {
   height: 80%;
   width: 200px;
   border-bottom: 3px solid #7e7e7e;
-  box-shadow: 0px 2px 1px 0.5 #ccc;
   display: flex;
   justify-content: center;
   align-items: center;

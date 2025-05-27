@@ -20,7 +20,9 @@ defineProps({
 }
 
 .profile-img {
-  width: 100%;
+  border: 3px #ccc solid;
+  width: 50px;
+  height: 50px;
   border-radius: 100%;
 }
 </style>
