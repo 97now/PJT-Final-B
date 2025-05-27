@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import searchIcon from "@/assets/img/Search.png";
+import searchIcon from "@/assets/img/Search.svg";
 import { watch } from "vue";
 
 const searchValue = defineModel();

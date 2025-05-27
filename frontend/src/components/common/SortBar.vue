@@ -21,7 +21,7 @@
 
 
 <script setup>
-import tuneImg from '@/assets/img/Tune.png'
+import tuneImg from '@/assets/img/Tune.svg'
 
 import { ref } from 'vue'
 

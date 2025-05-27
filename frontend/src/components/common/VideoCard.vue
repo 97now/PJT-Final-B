@@ -6,20 +6,22 @@
       </div>
       <div class="video-info">
         <span class="video-title">{{ video.title }}</span>
-        <span class="video-meta">
-          <img :src="eyeIcon" alt="조회수" class="icon" />{{
-            video.views
-          }}&nbsp; <img :src="heartIcon" alt="좋아요" class="icon" />{{
-            video.likes
-          }}
-        </span>
-      </div>
+        <div class="video-meta-group">
+          <span class="video-meta">
+            <img :src="eyeIcon" alt="조회수" class="icon" />{{ video.views }}
+          </span>
+          <span class="video-meta">
+            <img :src="heartIcon" alt="좋아요" class="icon" />{{ video.likes }}
+          </span>
+  </div>
+</div>
+
     </div>
   </router-link>
 </template>
 <script setup>
-import eyeIcon from "@/assets/img/Eye.png";
-import heartIcon from "@/assets/img/Heart.png";
+import eyeIcon from "@/assets/img/Eye.svg";
+import heartIcon from "@/assets/img/Heart.svg";
 // import videoCallIcon from '@/assets/img/Video_Call.png'
 const props = defineProps({ video: Object });
 
@@ -78,8 +80,9 @@ function getYoutubeThumbnail(url) {
 .video-info {
   padding: 18px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: row;
+  justify-content: space-between; /* 좌우로 공간 배분 */
+  align-items: center;            /* 세로 중앙 정렬 */
   gap: 10px;
 }
 
@@ -90,7 +93,17 @@ function getYoutubeThumbnail(url) {
   text-overflow: ellipsis;
   flex: 1;
   min-width: 0;
+  text-align: left;
+  /* 필요에 따라 width: 0; 추가 */
 }
+
+.video-meta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 오른쪽 정렬 */
+  gap: 4px;
+}
+
 
 .video-meta {
   font-size: 15px;
@@ -102,11 +115,13 @@ function getYoutubeThumbnail(url) {
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   display: inline-block;
   vertical-align: middle;
+  object-fit: contain;
 }
+
 
 @media (max-width: 700px) {
   .videos {

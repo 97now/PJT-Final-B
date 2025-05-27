@@ -52,11 +52,12 @@ import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 // import { ref, watch } from "vue";
 
-import adduserIcon from "@/assets/img/Add_User.png";
-import loginIcon from "@/assets/img/Login.png";
-import logoutIcon from "@/assets/img/Logout.png";
+import adduserIcon from "@/assets/img/Add_User.svg";
+import loginIcon from "@/assets/img/Login.svg";
+import logoutIcon from "@/assets/img/Logout.svg";
 
 const userStore = useUserStore();
+
 const { token, profileImg, userId, user } = storeToRefs(userStore);
 
 const logout = () => {
