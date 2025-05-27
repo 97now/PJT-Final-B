@@ -51,22 +51,22 @@ import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 
-import adduserIcon from "@/assets/img/Add_User.png";
-import loginIcon from "@/assets/img/Login.png";
-import logoutIcon from "@/assets/img/Logout.png";
+import adduserIcon from "@/assets/img/Add_User.svg";
+import loginIcon from "@/assets/img/Login.svg";
+import logoutIcon from "@/assets/img/Logout.svg";
 
 const userStore = useUserStore();
 const { token, profileImg } = storeToRefs(userStore);
 
-const user = ref(null);
+// const user = ref(null);
 
-watch(token, (newVal) => {
-  if (newVal) {
-    userStore.fetchUserInfo(userStore.userId).then((res) => {
-      user.value = res.data;
-    });
-  }
-});
+// watch(token, (newVal) => {
+//   if (newVal) {
+//     userStore.fetchUserInfo(userStore.userId).then((res) => {
+//       user.value = res.data;
+//     });
+//   }
+// });
 
 const logout = () => {
   userStore.logout();
