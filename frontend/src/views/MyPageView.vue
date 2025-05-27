@@ -5,7 +5,7 @@
         <ProfilePicture
           :img="`${userStore.profileImg}`"
           alt="내 프로필 이미지"
-          style="cursor: pointer"
+          style="cursor: pointer; padding: 0px 10px"
         />
         <div class="nickname" @click="goToDefault" style="cursor: pointer">
           <p>{{ user.userNickName }}</p>
@@ -171,9 +171,10 @@ function goToFollower() {
 
 .nickname {
   height: 80%;
-  width: 200px;
+  width: fit-content;
   border-bottom: 3px solid #7e7e7e;
   display: flex;
+  padding: 0px 20px;
   justify-content: center;
   align-items: center;
   cursor: pointer;

@@ -2,10 +2,10 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/api/axiosInstance";
-import eyeIcon from "@/assets/img/Eye.png";
-import heartIcon from "@/assets/img/Heart.png";
-import pencilIcon from "@/assets/img/Pencil.png";
-import deleteIcon from "@/assets/img/delete.png";
+import eyeIcon from "@/assets/img/Eye.svg";
+import heartIcon from "@/assets/img/Heart.svg";
+import pencilIcon from "@/assets/img/Pencil.svg";
+import deleteIcon from "@/assets/img/delete.svg";
 import CommentInput from "@/components/layout/CommentInput.vue";
 import CommentList from "@/components/layout/CommentList.vue";
 
@@ -321,8 +321,8 @@ async function submitEdit(content) {
   color: #444;
 }
 .icon {
-  width: 22px;
-  height: 22px;
+  width: 15px;
+  height: 15px;
   display: inline-block;
   vertical-align: middle;
 }
