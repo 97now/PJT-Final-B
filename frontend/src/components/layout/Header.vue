@@ -37,9 +37,9 @@
         class="header-link"
         :to="{
           name: 'myPage',
-          params: { userId: 'LEE_EONJI' },
+          params: { userId },
         }"
-        >my page</router-link
+        >{{ user?.userNickName }}</router-link
       >
     </nav>
   </div>
@@ -50,28 +50,36 @@
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
+import { ref, watch } from "vue";
 
 import adduserIcon from "@/assets/img/Add_User.png";
 import loginIcon from "@/assets/img/Login.png";
 import logoutIcon from "@/assets/img/Logout.png";
 
 const userStore = useUserStore();
-const { token, profileImg } = storeToRefs(userStore);
+const { token, profileImg, userId } = storeToRefs(userStore);
 
 const user = ref(null);
-
-watch(token, (newVal) => {
-  if (newVal) {
-    userStore.fetchUserInfo(userStore.userId).then((res) => {
-      user.value = res.data;
-    });
-  }
-});
 
 const logout = () => {
   userStore.logout();
   console.log("[Header] 토큰 : " + token.value);
 };
+
+watch(
+  [token, userId],
+  async ([newToken, newUserId]) => {
+    // console.log("[Header] newUserId = " + newUserId);
+
+    if (newToken && newUserId) {
+      user.value = await userStore.fetchUserInfo(newUserId);
+      // console.log("[Header] 유저 정보 : " + JSON.stringify(user.value));
+    } else {
+      user.value = null;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
