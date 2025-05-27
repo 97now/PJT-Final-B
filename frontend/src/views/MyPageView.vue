@@ -84,12 +84,6 @@ onMounted(async () => {
   );
 });
 
-// 프로필 사진 업로드
-const onChangeProfileImg = async () => {
-  console.log("[MyPageView] onChangeProfileImg 호출");
-  user.value = await userStore.fetchUserInfo(userId.value);
-};
-
 // 팔로잉 숫자 갱신
 const onUpdateFollowingCnt = (newVal) => {
   console.log("[MyPageView] onUpdateUserInfo 호출");
@@ -105,7 +99,7 @@ const onSearch = (keyword) => {
 
   if (keyword.trim()) {
     router.push(`/${userId.value}/myPage/follow-list/search`);
-  } else {
+  } else if (currentView.value === "search" && searchKeyword.value === "") {
     goToDefault();
   }
 };
@@ -113,23 +107,32 @@ const onSearch = (keyword) => {
 // 보여줄 리스트 구분
 const currentView = computed(() => {
   const relation = route.params.relation;
-  if (searchKeyword.value.trim()) {
-    return "search";
+
+  if (
+    relation === "follower" ||
+    relation === "following" ||
+    relation === "search"
+  ) {
+    return relation;
   }
-  return relation || "default";
+
+  return "default";
 });
 
 function goToDefault() {
+  console.log("[MyPageView] goToDefault 호출");
   searchKeyword.value = "";
   router.push(`/${userId.value}/myPage`);
 }
 
 function goToFollowing() {
+  console.log("[MyPageView] goToFollowing 호출");
   searchKeyword.value = "";
   router.push(`/${userId.value}/myPage/follow-list/following`);
 }
 
 function goToFollower() {
+  console.log("[MyPageView] goToFollower 호출");
   searchKeyword.value = "";
   router.push(`/${userId.value}/myPage/follow-list/follower`);
 }

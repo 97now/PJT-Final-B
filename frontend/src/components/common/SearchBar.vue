@@ -55,9 +55,9 @@ watch(searchValue, (newValue) => {
   color: #000;
   transition: border-color 0.2s;
 }
-.search-bar input:focus {
+/* .search-bar input:focus {
   border-bottom: 2.5px solid #000;
-}
+} */
 .search-icon {
   width: 24px;
   height: 24px;
