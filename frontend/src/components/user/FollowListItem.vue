@@ -1,6 +1,9 @@
 <template>
   <div class="user">
-    <ProfilePicture :img="imgUrl" alt="sadas" />
+    <ProfilePicture
+      :img="`http://localhost:8080${user.profileImg}`"
+      alt="sadas"
+    />
     <div class="userInfo">
       <p>
         <strong>{{ user.userNickName }}</strong>
@@ -17,7 +20,6 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import ProfilePicture from "../common/ProfilePicture.vue";
 import FollowButton from "../common/FollowButton.vue";
 import { useUserStore } from "@/stores/userStore";
@@ -25,8 +27,6 @@ import { useUserStore } from "@/stores/userStore";
 const userStore = useUserStore();
 
 const userId = userStore.userId;
-
-const imgUrl = ref("/User.png");
 const prop = defineProps({
   user: Object,
 });

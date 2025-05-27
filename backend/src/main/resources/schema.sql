@@ -15,7 +15,7 @@ CREATE TABLE user
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP,
     follower_cnt   int      DEFAULT 0,
     following_cnt   int      DEFAULT 0,
-    profile_img VARCHAR(100) DEFAULT '/User.png'
+    profile_img VARCHAR(100) DEFAULT '/upload/User.png'
 );
 
 -- 비디오 테이블

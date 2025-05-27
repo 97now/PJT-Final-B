@@ -1,5 +1,6 @@
 <template>
   <div v-if="!authorized" class="user-form">
+    <!-- 비밀번호 인증 -->
     <div class="page-title">
       <h1>비밀번호 인증</h1>
     </div>
@@ -16,15 +17,27 @@
     </form>
   </div>
 
+  <!-- 회원 정보 수정 -->
   <div v-else class="user-form">
     <div class="page-title">
       <h1>회원 정보 수정</h1>
     </div>
+    <!-- 프로필 사진 변경 -->
+    <div class="profile-img-container">
+      <ProfilePicture :img="newImgUrl" />
+      <ImgUploadForm
+        action="프로필 사진 등록"
+        class="modify-info-btn-item"
+        @changeProfileImg="updateProfileImg"
+      />
+      <ImgUploadForm
+        action="프로필 사진 삭제"
+        class="modify-info-btn-item"
+        @deleteProfileImg="deleteProfileImg"
+      />
+    </div>
+    <!-- 개인 정보 변경 -->
     <form @submit.prevent="onSubmit">
-      <div class="input">
-        <label>아이디</label>
-        <span class="fixed">{{ userId }}</span>
-      </div>
       <div class="input">
         <label for="pw">새 비밀번호</label>
         <BaseInput
@@ -130,7 +143,8 @@ import BaseInput from "@/components/common/BaseInput.vue";
 import EmailDomainDropbox from "@/components/common/EmailDomainDropbox.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import BaseDropBox from "@/components/common/BaseDropBox.vue";
-
+import ImgUploadForm from "@/components/common/ImgUploadForm.vue";
+import ProfilePicture from "@/components/common/ProfilePicture.vue";
 const userStore = useUserStore();
 const router = useRouter();
 
@@ -292,7 +306,22 @@ const emailValidationCheck = () => {
   }
 };
 
-// 제출
+// 프로필 사진 관련
+const newImgUrl = ref(userStore.profileImg);
+const profileImg = ref(null);
+
+const updateProfileImg = ({ file, previewUrl }) => {
+  newImgUrl.value = previewUrl;
+  profileImg.value = file;
+};
+
+const deleteProfileImg = () => {
+  userStore.deleteProfileImg();
+  newImgUrl.value = userStore.DEFAULT_PROFILE_IMG;
+  userStore.profileImg = userStore.DEFAULT_PROFILE_IMG;
+};
+
+// 제출 시
 const onSubmit = async () => {
   phoneValidationCheck();
   emailValidationCheck();
@@ -303,15 +332,12 @@ const onSubmit = async () => {
     !isValidPhone.value ||
     !isValidEmail.value
   ) {
-    console.log("isValidPw : " + isValidPw.value + " " + pwErrorMsg.value);
-    console.log("isSamePw : " + isSamePw.value + " " + pwCheckErrorMsg.value);
-    console.log(
-      "isValidPhone : " + isValidPhone.value + " " + phoneErrorMsg.value
-    );
-    console.log(
-      "isValidEmail : " + isValidEmail.value + " " + emailErrorMsg.value
-    );
+    console.log("유효성 검사 실패");
     return;
+  }
+
+  if (profileImg.value) {
+    await userStore.uploadProfileImg(profileImg.value);
   }
 
   const user = {
@@ -328,9 +354,8 @@ const onSubmit = async () => {
 
   try {
     await userStore.updateUser(userId, user);
-    alert("회원 정보 수정 완료 >< !!!");
-    userStore.logout();
-    router.push("/login");
+    alert("회원 정보 수정 완료 👍 !!!");
+    router.replace("/");
   } catch (error) {
     alert("회원 정보 수정 중 오류 발생 ;ㅅ;");
   }
@@ -387,5 +412,11 @@ form {
 
 .authorizeBtn {
   margin-top: 20px;
+}
+
+.profile-img-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 </style>

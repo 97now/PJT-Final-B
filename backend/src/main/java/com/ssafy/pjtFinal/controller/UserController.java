@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.eclipse.tags.shaded.org.apache.regexp.RE;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,16 +44,31 @@ public class UserController {
     }
 
     // 프로필 사진 등록
-    @PostMapping("/uploadProfile")
+    @PostMapping("/profile")
     public ResponseEntity<String> uploadProfile(@AuthenticationPrincipal UserDetails userDetails, @RequestParam("file")MultipartFile file) {
         System.out.println("[UserController] uploadProfile 호출");
         
         String userId = userDetails.getUsername();
         try{
             String savedPath = userService.saveProfileImage(file, userId);
+            System.out.println("[UserController] 응답 body = " + savedPath);
             return ResponseEntity.ok(savedPath);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
+        }
+    }
+
+    // 프로필 사진 삭제
+    @DeleteMapping("/profile")
+    public ResponseEntity<String> deleteProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println("[UserController] deleteProfile 호출");
+        String userId = userDetails.getUsername();
+        try{
+            userService.deleteProfileImage(userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 삭제 실패");
         }
     }
 
@@ -62,13 +78,14 @@ public class UserController {
         System.out.println("[UserController] 로그인 요청 들어옴");
 
         try {
-//            User user = userService.userLogin(request);
+            String userId = request.getUserId();
+            User user = userService.getUserOne(userId);
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUserId(), request.getUserPw())
             );
             String token = jwtUtil.generateToken(request.getUserId());
-            return ResponseEntity.ok(new LoginResponse(token, request.getUserId()));
+            return ResponseEntity.ok(new LoginResponse(token, userId, user.getProfileImg()));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패 😕");
         }

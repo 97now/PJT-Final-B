@@ -1,10 +1,15 @@
 import { defineStore } from "pinia";
 import api from "@/api/axiosInstance";
 
+const BASE_URL = "http://localhost:8080";
+
 export const useUserStore = defineStore("user", {
   state: () => ({
+    DEFAULT_PROFILE_IMG: "http://localhost:8080/upload/User.png",
     token: null,
     userId: null,
+    user: null,
+    profileImg: null,
     isLoggedIn: false,
     error: null,
   }),
@@ -65,10 +70,15 @@ export const useUserStore = defineStore("user", {
         this.token = response.data.token;
         this.isLoggedIn = true;
         this.userId = response.data.userId;
+        this.profileImg = "http://localhost:8080" + response.data.profileImg;
+        this.user = await this.fetchUserInfo(this.userId);
 
-        console.log("[userStore.js] 로그인 후 token = " + this.token);
-        console.log("[userStore.js] 로그인 후 isLoggedIn = " + this.isLoggedIn);
-        console.log("[userStore.js] 로그인 후 userId = " + this.userId);
+        // console.log("[userStore.js] response.data = ", response.data);
+
+        // console.log("[userStore.js] 로그인 후 token = " + this.token);
+        // console.log("[userStore.js] 로그인 후 isLoggedIn = " + this.isLoggedIn);
+        // console.log("[userStore.js] 로그인 후 userId = " + this.userId);
+        // console.log("[userStore.js] 로그인 후 profileImg = " + this.profileImg);
       } catch (error) {
         const msg =
           typeof error.response?.data === "string"
@@ -85,12 +95,14 @@ export const useUserStore = defineStore("user", {
         this.userId = null;
         this.isLoggedIn = false;
         this.token = null;
+        this.profileImg = null;
+        this.user = null;
 
-        console.log("[userStore.js] 로그아웃 후 token = " + this.token);
-        console.log(
-          "[userStore.js] 로그아웃 후 isLoggedIn = " + this.isLoggedIn
-        );
-        console.log("[userStore.js] 로그아웃 후 userId = " + this.userId);
+        // console.log("[userStore.js] 로그아웃 후 token = " + this.token);
+        // console.log(
+        //   "[userStore.js] 로그아웃 후 isLoggedIn = " + this.isLoggedIn
+        // );
+        // console.log("[userStore.js] 로그아웃 후 userId = " + this.userId);
       } catch (error) {
         this.error =
           error.response?.data?.message || "로그아웃 중 오류가 발생했습니다.";
@@ -107,7 +119,8 @@ export const useUserStore = defineStore("user", {
           `http://localhost:8080/api/user/${userId}`
         );
 
-        console.log(response.data);
+        this.profileImg = "http://localhost:8080" + response.data.profileImg;
+
         return response.data;
       } catch (error) {
         this.error =
@@ -117,6 +130,7 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    // 모든 사용자 정보 조회
     async fetchUserList() {
       try {
         const response = await api.get(`http://localhost:8080/api/user`);
@@ -130,12 +144,52 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    // 프로필사진 등록
+    async uploadProfileImg(file) {
+      console.log("[userStore.js] file = ", file);
+
+      // 실제 서버 저장용
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await api.post(
+          "http://localhost:8080/api/user/profile",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data) {
+          this.profileImg = "http://localhost:8080" + response.data;
+        }
+      } catch (err) {
+        console.error("이미지 업로드 실패 : ", err);
+        return;
+      }
+    },
+
+    // 프로필사진 삭제
+    async deleteProfileImg() {
+      try {
+        await api.delete("http://localhost:8080/api/user/profile");
+        this.profileImg = this.DEFAULT_PROFILE_IMG;
+      } catch (error) {
+        this.error =
+          error.response?.data?.message ||
+          "프로필사진 삭제 중 오류가 발생했습니다.";
+        throw error;
+      }
+    },
+
     // 아이디 찾기
     async findId(findIdData) {
-      console.log(
-        "[userStore.js] 아이디 찾기 함수 호출, data = " +
-          JSON.stringify(findIdData)
-      );
+      // console.log(
+      //   "[userStore.js] 아이디 찾기 함수 호출, data = " +
+      //     JSON.stringify(findIdData)
+      // );
 
       try {
         const response = await api.post(
@@ -154,10 +208,10 @@ export const useUserStore = defineStore("user", {
 
     // 비밀번호 찾기
     async findPw(findPwRequest) {
-      console.log(
-        "[userStore.js] 비밀번호 찾기 함수 호출, data = " +
-          JSON.stringify(findPwRequest)
-      );
+      // console.log(
+      //   "[userStore.js] 비밀번호 찾기 함수 호출, data = " +
+      //     JSON.stringify(findPwRequest)
+      // );
 
       try {
         const response = await api.post(
@@ -176,10 +230,10 @@ export const useUserStore = defineStore("user", {
 
     // 비밀번호 재설정
     async resetPw(resetPwRequest) {
-      console.log(
-        "[userStore.js] 비밀번호 재설정 함수 호출, data = " +
-          JSON.stringify(resetPwRequest)
-      );
+      // console.log(
+      //   "[userStore.js] 비밀번호 재설정 함수 호출, data = " +
+      //     JSON.stringify(resetPwRequest)
+      // );
 
       try {
         await api.post(
@@ -221,16 +275,18 @@ export const useUserStore = defineStore("user", {
 
     // 사용자 정보 수정
     async updateUser(userId, userData) {
-      console.log(
-        "[userStore.js] 사용자 정보 수정 함수 호출, userData = ",
-        userData
-      );
+      // console.log(
+      //   "[userStore.js] 사용자 정보 수정 함수 호출, userData = ",
+      //   userData
+      // );
 
       try {
         const response = await api.put(
           `http://localhost:8080/api/user/${userId}`,
           userData
         );
+
+        this.user = response.data;
 
         return response.data;
       } catch (error) {
@@ -243,6 +299,8 @@ export const useUserStore = defineStore("user", {
 
     // 사용자 삭제
     async deleteUser(userId) {
+      console.log("[userStore.js] deleteUser 함수 호출");
+
       try {
         const response = await api.delete(
           `http://localhost:8080/api/user/${userId}`
@@ -250,6 +308,8 @@ export const useUserStore = defineStore("user", {
         this.userId = null;
         this.isLoggedIn = false;
         this.token = null;
+        this.profileImg = null;
+        this.user = null;
 
         return response.data;
       } catch (error) {
@@ -347,7 +407,7 @@ export const useUserStore = defineStore("user", {
   },
 
   persist: {
-    paths: ["token", "userId", "isLoggedIn"],
-    storage: localStorage,
+    paths: ["token", "userId", "isLoggedIn", "profileImg"],
+    storage: sessionStorage,
   },
 });

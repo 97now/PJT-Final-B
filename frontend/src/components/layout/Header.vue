@@ -3,31 +3,43 @@
     <div class="header-title">
       <router-link to="/">SSAFIT</router-link>
     </div>
+    <!-- 로그인 안 돼 있을 때 -->
     <nav v-if="!token" class="header-actions">
+      <!-- 회원가입 -->
       <i class="fas fa-user header-icon"></i>
       <img :src="adduserIcon" alt="signup" class="icon" />
       <router-link :to="{ name: 'signUp' }" class="header-link"
         >sign up</router-link
       >
+
       <i class="fas fa-sign-in-alt header-icon" style="margin-left: 18px"></i>
       <img :src="loginIcon" alt="login" class="icon" />
       <router-link :to="{ name: 'logIn' }" class="header-link"
         >login</router-link
       >
     </nav>
+    <!-- 로그인 돼 있을 때 -->
     <nav v-else class="header-actions">
+      <!-- 로그아웃 -->
       <img :src="logoutIcon" alt="signup" class="icon" />
       <router-link to="/" @click="logout" class="header-link"
         >logout</router-link
       >
-      <img :src="userIcon" alt="signup" class="icon" />
+
+      <!-- 마이 페이지 -->
+      <img
+        v-if="profileImg"
+        :src="profileImg"
+        alt="signup"
+        class="icon profile-img"
+      />
       <router-link
         class="header-link"
         :to="{
           name: 'myPage',
-          params: { userId: 'LEE_EONJI' },
+          params: { userId },
         }"
-        >my page</router-link
+        >{{ user?.userNickName }}</router-link
       >
     </nav>
   </div>
@@ -38,20 +50,34 @@
 import { storeToRefs } from "pinia";
 import { RouterLink } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
+// import { ref, watch } from "vue";
 
 import adduserIcon from "@/assets/img/Add_User.png";
-import userIcon from "@/assets/img/User.png";
 import loginIcon from "@/assets/img/Login.png";
 import logoutIcon from "@/assets/img/Logout.png";
 
 const userStore = useUserStore();
-
-const { token } = storeToRefs(userStore);
+const { token, profileImg, userId, user } = storeToRefs(userStore);
 
 const logout = () => {
   userStore.logout();
   console.log("[Header] 토큰 : " + token.value);
 };
+
+// watch(
+//   [token, user],
+//   async ([newToken, newUser]) => {
+//     // console.log("[Header] newUserId = " + newUserId);
+
+//     if (newToken && newUser) {
+//       user.value = await userStore.fetchUserInfo(newUser);
+//       // console.log("[Header] 유저 정보 : " + JSON.stringify(user.value));
+//     } else {
+//       user.value = null;
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>
 
 <style scoped>
@@ -106,5 +132,12 @@ const logout = () => {
   border: none;
   border-bottom: 2px solid #bbb;
   width: 100%;
+}
+
+.profile-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  border: 2px solid #ccc;
 }
 </style>

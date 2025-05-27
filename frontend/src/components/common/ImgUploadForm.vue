@@ -1,7 +1,8 @@
 <template>
   <div>
-    <button class="changeImgBtn" @click="clickInput">프로필 사진 변경</button>
+    <button class="changeImgBtn" @click="clickInput">{{ action }}</button>
     <input
+      v-if="action === '프로필 사진 등록'"
       type="file"
       ref="fileInput"
       @change="handleImgUpload"
@@ -14,41 +15,31 @@
 <script setup>
 import { ref } from "vue";
 
-import api from "@/api/axiosInstance";
+const props = defineProps({
+  action: String,
+});
 
-const emit = defineEmits(["changeProfileImg"]);
+const emit = defineEmits(["changeProfileImg", "deleteProfileImg"]);
 
-const fileInput = ref(null);
-
-const clickInput = () => {
-  fileInput.value.click();
-};
-
+// 프로필 이미지 업로드
 const handleImgUpload = async (event) => {
   console.log("[ImgUploadForm] 이미지 업로드 함수 호출");
 
   const file = event.target.files[0];
 
-  const formData = new FormData();
-  formData.append("file", file);
+  if (!file) return;
 
-  try {
-    const response = await api.post(
-      "http://localhost:8080/api/user/uploadProfile",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+  // 미리보기용
+  const previewUrl = URL.createObjectURL(file);
+  emit("changeProfileImg", { file, previewUrl });
+};
 
-    if (response.data) {
-      console.log(response.data);
-      emit("changeProfileImg", response.data);
-    }
-  } catch (err) {
-    console.error("업로드 실패 : ", err);
+const fileInput = ref(null);
+
+const clickInput = () => {
+  if (props.action === "프로필 사진 등록") fileInput.value.click();
+  else {
+    emit("deleteProfileImg");
   }
 };
 </script>
@@ -56,10 +47,9 @@ const handleImgUpload = async (event) => {
 <style scoped>
 .changeImgBtn {
   padding: 7px;
-  border-radius: 5%;
+  border-radius: 5px;
   margin-left: 10px;
   position: relative;
-  bottom: 12px;
   text-decoration: none;
   color: black;
   box-shadow: 0px 0px 1px 0.8px #7e7e7e;
