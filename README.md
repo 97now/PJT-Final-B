@@ -1,9 +1,26 @@
-# SSAFY 최종 관통 프로젝트
+# SSAFY 최종 관통 프로젝트 - B조
+
+## 👥 팀원 소개
+
+### 김현재
+
+- 팀장
+- 메인 기능 담당
+- 디자인 및 발표 담당
+
+### 이언지
+
+- 팀원
+- 유저 담당
+- 잡무 담당
+
+<br>
 
 ## 🏗️ 아키텍처
 
 - Java 기반 Spring Boot 프레임워크를 활용하여 MVC 구조로 설계
 - ORM 프레임워크로 MyBatis를 도입하여 MySQL과의 데이터 연동을 구현
+- <br>
 
 ## ⚙️ 기술 스택
 
@@ -17,17 +34,18 @@
 | 빌드 도구    | Maven       |
 
 <br>
-<br>
 
 ## 📝 세부 사항 및 문제점
 
-### USER
+<details>
+<summary>⭐ USER 관련 (언지)</summary>
 
 [언지 리드미 보기](./aboutPJT/이언지README.md)
 
 #### 0. 공통
 
 - IME 입력기에서 한글 입력 감지가 매끄럽지 않아서 input 필드에서 한글 입력 시 조건 검사가 안 되는 문제 해결 필요
+- 에러 메시지 분기 처리 세분화 필요
 
 #### 1. 회원가입
 
@@ -110,7 +128,42 @@ JWT를 활용한 로그인 처리 및 요청 인가 처리
   - 어차피 유저 목록을 띄워야 하므로, 팔로잉 팔로우 목록을 불러오면서 불러온 배열의 length 값과 함께 emit 하는 방식으로 해결
 - 백엔드에서 리스트 불러올 때 매번 불러온 배열 전체를 돌면서 isFollowed 여부를 체크해서 매핑하고 가져오는 게 언짢았음. 더 효율적인 방법이 있지 않았을까.
   - lombok 에서는 boolean형 변수명을 isFollowed로 지으면 getter setter에서 자동으로 is를 떼고 인식함.
+  </details>
 
+<details>
+<summary>⭐ MAIN 기능 관련 (현재)</summary>
+
+[현재 리드미 보기](./aboutPJT/김현재README.md)
+
+#### 0. 공통
+
+- UX 측면에서 디테일 개선 필요
+
+#### 1. 영상 검색
+
+제목으로 영상 검색 가능
+
+- 채널명, 제목 등 다양한 조건 검색 가능하도록 기능 개선 가능
+
+#### 2. 영상 정렬
+
+조회순, 좋아요순 영상 정렬
+
+#### 3. 영상 상세
+
+##### 3-1. 조회수 업데이트
+
+영상 상세 페이지 조회 시 조회수 업데이트
+
+#### 4. 영상 좋아요
+
+영상 좋아요 시 마이 페이지에서 내가 좋아요 한 영상 목록 확인 가능
+
+- 메인 화면에서도 좋아요 여부에 따라 UI 바뀌도록 개선 가능
+
+#### 5. 리뷰
+
+  </details>
 <br>
 <br>
 
@@ -122,6 +175,8 @@ JWT를 활용한 로그인 처리 및 요청 인가 처리
 ![비밀번호찾기](./aboutPJT/views/findPw.png)
 ![비밀번호재설정](./aboutPJT/views/resetPw.png)
 ![메인](./aboutPJT/views/main.png)
+![상세페이지](./aboutPJT/views/videodetail.png)
+![리뷰](./aboutPJT/views/review.png)
 ![마이페이지](./aboutPJT/views/myPage.png)
 ![마이페이지2](./aboutPJT/views/myPage2.png)
 ![회원정보수정](./aboutPJT/views/modifyInfo.png)
