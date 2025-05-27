@@ -5,8 +5,6 @@ import com.ssafy.pjtFinal.error.ErrorCode;
 import com.ssafy.pjtFinal.model.dao.UserDao;
 import com.ssafy.pjtFinal.model.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
