@@ -3,7 +3,7 @@
     <div class="page-title">
       <h1>비밀번호 찾기</h1>
     </div>
-    <form @submit.prevent="onSubmit">
+    <form @submit.prevent="">
       <div class="input">
         <label>아이디</label>
         <BaseInput v-model="userId" placeholder="가입한 아이디를 입력하세요" />
@@ -18,7 +18,7 @@
             placeholder="휴대폰 번호 입력 ('-' 제외 11자리 입력)"
             v-model="userPhone"
           />
-          <button>본인인증</button>
+          <button @click.prevent="onSubmit">본인인증</button>
         </div>
       </div>
       <BaseButton text="비밀번호 재설정" />

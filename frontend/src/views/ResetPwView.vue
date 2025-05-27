@@ -126,7 +126,10 @@ const onSubmit = async () => {
     router.replace({ name: "logIn" });
   } catch (error) {
     console.log(error);
-    alert("비밀번호 재설정 중 오류가 발생했습니다.");
+    const errMsg = error.response.data.message
+      ? error.response.data.message
+      : "비밀번호 재설정 중 오류 발생.....";
+    alert(errMsg);
     router.replace({ name: "findPw" });
   }
 };
