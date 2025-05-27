@@ -7,170 +7,121 @@
 
 ## ⚙️ 기술 스택
 
-| 항목         | 기술                               |
-| ------------ | ---------------------------------- |
-| 언어         | Java                               |
-| 프레임워크   | Spring Boot                        |
-| 뷰           | HTML, JavaScript (Fetch / AJAX)    |
-| 데이터베이스 | MySQL                              |
-| ORM          | MyBatis                            |
-| 빌드 도구    | Maven                              |
-| 서버         | 내장 Tomcat (Spring Boot Embedded) |
+| 항목         | 기술        |
+| ------------ | ----------- |
+| 언어         | Java 17     |
+| 프레임워크   | Spring Boot |
+| 뷰           | Vue 3       |
+| 데이터베이스 | MySQL       |
+| ORM          | MyBatis     |
+| 빌드 도구    | Maven       |
 
 <br>
 <br>
-<br>
 
-## 📌 기능 명세서
+## 📝 세부 사항 및 문제점
 
-### 👤 사용자 관리
+### USER
 
-| **기능명**     | **설명**                             | **관련 화면**        | **관련 API**                |
-| -------------- | ------------------------------------ | -------------------- | --------------------------- |
-| 회원가입       | 사용자 정보를 입력받아 회원 등록     | 회원가입 화면        | `POST /api/user`            |
-| 로그인         | 로그인 정보를 입력해 세션 생성       | 로그인 화면          | `POST /api/user/login`      |
-| 내 정보 조회   | 세션을 기반으로 유저 정보 조회       | 마이페이지           | `GET /api/user/{userId}`    |
-| 회원 목록 조회 | 전체 유저 목록 보기 (관리자 전용 등) | 관리자 페이지        | `GET /api/user`             |
-| 회원 정보 수정 | 유저 본인의 정보 수정                | 마이페이지 수정 화면 | `PUT /api/user/{userId}`    |
-| 회원 탈퇴      | 회원 탈퇴 처리                       | 마이페이지           | `DELETE /api/user/{userId}` |
+[언지 리드미 보기](./aboutPJT/이언지README.md)
 
----
+#### 0. 공통
 
-### 🎬 비디오 관리
+- IME 입력기에서 한글 입력 감지가 매끄럽지 않아서 input 필드에서 한글 입력 시 조건 검사가 안 되는 문제 해결 필요
 
-| **기능명**     | **설명**                            | **관련 화면**         | **관련 API**                  |
-| -------------- | ----------------------------------- | --------------------- | ----------------------------- |
-| 비디오 업로드  | 동영상과 정보를 함께 업로드         | 영상 업로드 화면      | `POST /api/video`             |
-| 영상 목록 보기 | 전체 또는 검색조건에 맞는 영상 보기 | 메인 / 검색 결과 화면 | `GET /api/video`              |
-| 영상 상세 보기 | 영상 클릭 시 상세 정보 및 영상 표시 | 영상 상세 페이지      | `GET /api/video/{videoId}`    |
-| 영상 수정      | 기존에 올린 영상을 수정             | 영상 수정 화면        | `PUT /api/video/{videoId}`    |
-| 영상 삭제      | 본인이 업로드한 영상 삭제           | 마이페이지 > 내 영상  | `DELETE /api/video/{videoId}` |
+#### 1. 회원가입
 
----
+입력값 유효성 검사 (정규식, input 이벤트 사용한 처리)
 
-### ❤️ 좋아요 기능
+- 비밀번호 암호화
+  - 백엔드의 Service 단계에서 암호화 처리해주고 있기 때문에 컨트롤러까지는 평문으로 담겨 거쳐가는 문제.  
+     프론트 측 비밀번호 암호화 처리 필요성에 대한 고민
+- 어떤 요소를 어떤 타이밍에 검사하여 경고를 띄워줄지, 함수 호출이 불필요하게 많거나 로직이 비효율적이진 않은지 등등  
+  효율성과 UX 측면에서 판단하는 게 까다로웠음
 
-| **기능명**               | **설명**                                | **관련 화면**       | **관련 API**                                              |
-| ------------------------ | --------------------------------------- | ------------------- | --------------------------------------------------------- |
-| 영상 좋아요              | 영상에 좋아요 누르기                    | 영상 상세 페이지    | `POST /api/video-like`                                    |
-| 좋아요 목록 보기         | 내가 누른 영상 목록 조회                | 마이페이지 > 좋아요 | `GET /api/video-like/user/{userId}`                       |
-| 팔로잉한 유저들의 좋아요 | 내가 팔로우한 유저들의 좋아요 영상 조회 | 추천 영상 탭        | `GET /api/video-like/user/{userId}/following`             |
-| 좋아요 여부 확인         | 영상 상세 내 좋아요 상태 체크           | 영상 상세 페이지    | `GET /api/video-like/user/{userId}/video/{videoId}/check` |
-| 좋아요 개수 조회         | 영상별 좋아요 수 표시                   | 영상 리스트/상세    | `GET /api/video-like/video/{videoId}/count`               |
-| 좋아요 취소              | 좋아요 취소                             | 영상 상세 페이지    | `DELETE /api/video-like/user/{userId}/video/{videoId}`    |
+#### 2. 로그인
 
----
+JWT를 활용한 로그인 처리 및 요청 인가 처리  
+프론트는 navigagion guard, 백엔드는 spring security 사용
 
-### 📝 리뷰 기능
+- 토큰 만료 시 강제 로그아웃 되는 문제 -> 추후 refresh 토큰 발급 방안 고려
+- 토큰 상태 변화를 자동으로 감지하여 로그인 상태를 동기화하는 데서 어려움을 겪음  
+   특히 header는 자주 새로 mount 되는 요소가 아니기 때문에 싱크 맞추기 어려웠음
+  - sessionStorage에 어디까지 저장해도 되느냐에 대한 고민.  
+    user 객체 자체를 저장하면 관리하기 편하지만 민감한 개인정보가 포함될 수도 있다는 우려.
 
-| **기능명**       | **설명**                             | **관련 화면**               | **관련 API**                    |
-| ---------------- | ------------------------------------ | --------------------------- | ------------------------------- |
-| 리뷰 작성        | 영상에 대한 리뷰 작성                | 영상 상세 페이지            | `POST /api/review`              |
-| 조건별 리뷰 조회 | 영상 ID, 유저 ID 등에 따른 리뷰 검색 | 영상 상세, 관리자 리뷰 관리 | `GET /api/review`               |
-| 전체 리뷰 보기   | 전체 리뷰 목록 조회                  | 관리자 리뷰 관리            | `GET /api/review/all-review`    |
-| 리뷰 상세 조회   | 리뷰 내용 자세히 보기                | 영상 상세 페이지            | `GET /api/review/{reviewId}`    |
-| 리뷰 수정        | 작성한 리뷰 수정                     | 마이페이지 > 내 리뷰        | `PUT /api/review/{reviewId}`    |
-| 리뷰 삭제        | 리뷰 삭제                            | 마이페이지 > 내 리뷰        | `DELETE /api/review/{reviewId}` |
+#### 3. 아이디 찾기
 
----
+개인정보를 활용한 아이디 찾기
 
-### 👥 팔로우 기능
+- 현재 닉네임, 전화번호, 이메일이 unique 필드가 아님. 추후 식별 가능한 필드를 통한 검증 로직 필요
 
-| **기능명**       | **설명**                   | **관련 화면**            | **관련 API**                         |
-| ---------------- | -------------------------- | ------------------------ | ------------------------------------ |
-| 팔로우 추가      | 다른 유저 팔로우 등록      | 유저 프로필, 영상 상세   | `POST /api/follow`                   |
-| 팔로잉 목록 보기 | 내가 팔로우한 유저 리스트  | 마이페이지 > 팔로잉      | `GET /api/follow/{userId}/following` |
-| 팔로워 목록 보기 | 나를 팔로우한 유저 리스트  | 마이페이지 > 팔로워      | `GET /api/follow/{userId}/follower`  |
-| 팔로우 여부 확인 | 특정 유저 팔로우 여부 확인 | 유저 프로필              | `GET /api/follow/{followeeId}/check` |
-| 팔로우 취소      | 팔로우 관계 해제           | 마이페이지 > 팔로잉 관리 | `DELETE /api/follow/{userId}`        |
+#### 4. 비밀번호 찾기
 
-<br>
-<br>
-<br>
+아이디와 전화번호를 활용한 본인인증 후 비밀번호 재설정
 
-## 📌 API 명세서
+- 비밀번호를 암호화 처리하면서 user의 원래 비밀번호를 가져오는 게 어려움 + 보안상의 이유로 비밀번호 찾기보다 재설정이 적합할 것이라고 판단
+- form 태그 안에 본인인증 버튼과 제출 버튼이 들어가는데, 현재 어느 버튼을 누르든 submit 으로 넘어가는 문제  
+  -> 본인인증 기능 도입 시 각기 동작하도록 처리 필요
 
-### 🔐 User API `/api/user`
+##### 4-1. 비밀번호 재설정
 
-| Method | Endpoint             | 설명           | 요청 데이터       | 응답             | 상태코드                          |
-| ------ | -------------------- | -------------- | ----------------- | ---------------- | --------------------------------- |
-| POST   | `/api/user`          | 유저 등록      | User JSON         | 생성된 User      | `201 Created`                     |
-| POST   | `/api/user/login`    | 로그인         | LoginRequest JSON | 없음 (세션 저장) | `200 OK`                          |
-| GET    | `/api/user/{userId}` | 단일 유저 조회 | 없음              | User             | `200 OK`, `404 Not Found`         |
-| GET    | `/api/user`          | 전체 유저 조회 | 없음              | List<User>       | `200 OK`, `204 No Content`        |
-| PUT    | `/api/user/{userId}` | 유저 수정      | User JSON         | 수정된 User      | `200 OK`, `404 Not Found`         |
-| DELETE | `/api/user/{userId}` | 유저 삭제      | 없음              | 없음             | `204 No Content`, `404 Not Found` |
+이전과 동일하지 않은 새로운 비밀번호로 재설정
 
----
+- 백엔드로 재설정 정보 저장 시 userId와 새로운 비밀번호를 평문으로 객체에 담아서 전달  
+  -> 요청을 가로채면 조작 가능하지 않을까 하는 우려. 처리 방법 고민 필요.
 
-### 🎬 Video API `/api/video`
+#### 5. 마이페이지
 
-| Method | Endpoint               | 설명                           | 요청 데이터                                   | 응답         | 상태코드                          |
-| ------ | ---------------------- | ------------------------------ | --------------------------------------------- | ------------ | --------------------------------- |
-| POST   | `/api/video`           | 비디오 등록                    | `@ModelAttribute Video`, `MultipartFile file` | 생성된 Video | `201 Created`                     |
-| GET    | `/api/video`           | 비디오 검색/전체 조회          | `SearchCondition` (쿼리 파라미터)             | List<Video>  | `200 OK`                          |
-| GET    | `/api/video/{videoId}` | 비디오 단일 조회 + 조회수 증가 | 없음                                          | Video        | `200 OK`, `404 Not Found`         |
-| PUT    | `/api/video/{videoId}` | 비디오 수정                    | `@ModelAttribute Video`, `MultipartFile file` | 수정된 Video | `200 OK`, `404 Not Found`         |
-| DELETE | `/api/video/{videoId}` | 비디오 삭제                    | 없음                                          | 없음         | `204 No Content`, `404 Not Found` |
+요청을 구분하여 팔로잉리스트, 팔로워리스트, 좋아요 한 영상 리스트, 유저 검색 결과 등 다른 콘텐츠 제공
 
----
+- 초기에는 RouterView로 화면에 띄웠는데, 중간에 v-if 로 조건부 렌더링 처리
 
-### 📝 Review API `/api/review`
+##### 5-1. 유저 검색
 
-| Method | Endpoint                 | 설명           | 요청 데이터                 | 응답         | 상태코드                  |
-| ------ | ------------------------ | -------------- | --------------------------- | ------------ | ------------------------- |
-| POST   | `/api/review`            | 리뷰 등록      | Review JSON                 | 생성된 리뷰  | `201 Created`             |
-| GET    | `/api/review`            | 조건 검색      | SearchCondition JSON (Body) | List<Review> | `200 OK`                  |
-| GET    | `/api/review/all-review` | 전체 리뷰 조회 | 없음                        | List<Review> | `200 OK`                  |
-| GET    | `/api/review/{reviewId}` | 단일 리뷰 조회 | 없음                        | Review       | `200 OK`, `404 Not Found` |
-| PUT    | `/api/review/{reviewId}` | 리뷰 수정      | Review JSON                 | 수정된 리뷰  | `200 OK`, `404 Not Found` |
-| DELETE | `/api/review/{reviewId}` | 리뷰 삭제      | 없음                        | 없음         | `200 OK`, `404 Not Found` |
+닉네임으로 유저를 검색하여 팔로우/언팔로우 가능
 
----
+- 검색어를 입력한 채로 팔로잉 목록 보기 요청을 보내는 경우 잠깐 팔로잉 목록이 떴다가 default(좋아요 한 영상)로 튕기는 문제
+  - searchbar input 을 watch 로 감지했기 때문에 following 으로 이동하면서 value를 빈 문자열로 바꾸는 것도 이벤트로 인식하여 onSearch 함수 호출  
+    -> 분기 처리를 세분화하여 해결
 
-### 👥 Follow API `/api/follow`
+#### 6. 회원 정보 수정
 
-| Method | Endpoint                         | 설명             | 요청 데이터                 | 응답       | 상태코드                   |
-| ------ | -------------------------------- | ---------------- | --------------------------- | ---------- | -------------------------- |
-| POST   | `/api/follow`                    | 팔로우 등록      | Follow JSON                 | 없음       | `200 OK`, `409 Conflict`   |
-| GET    | `/api/follow/{userId}/following` | 팔로잉 목록      | 없음                        | List<User> | `200 OK`, `204 No Content` |
-| GET    | `/api/follow/{userId}/follower`  | 팔로워 목록      | 없음                        | List<User> | `200 OK`, `204 No Content` |
-| GET    | `/api/follow/{followeeId}/check` | 팔로우 여부 체크 | 세션에서 로그인된 유저 필요 | Boolean    | `200 OK`, `404 Not Found`  |
-| DELETE | `/api/follow/{userId}`           | 팔로우 취소      | 세션에서 로그인된 유저 필요 | 없음       | `200 OK`, `404 Not Found`  |
+비밀번호 인증 후 회원 정보 수정
 
----
+##### 6-1. 프로필 사진
 
-### ❤️ Video Like API `/api/video-like`
+프로필 사진 등록 및 삭제 (삭제 시 기본 이미지로 변경)
 
-| Method | Endpoint                                              | 설명                          | 요청 데이터    | 응답        | 상태코드                      |
-| ------ | ----------------------------------------------------- | ----------------------------- | -------------- | ----------- | ----------------------------- |
-| POST   | `/api/video-like`                                     | 좋아요 등록                   | VideoLike JSON | 없음        | `201 Created`, `409 Conflict` |
-| GET    | `/api/video-like/user/{userId}`                       | 내가 누른 좋아요 영상 목록    | 없음           | List<Video> | `200 OK`, `204 No Content`    |
-| GET    | `/api/video-like/user/{userId}/following`             | 팔로잉한 유저들의 좋아요 영상 | 없음           | List<Video> | `200 OK`, `204 No Content`    |
-| GET    | `/api/video-like/user/{userId}/video/{videoId}/check` | 좋아요 여부 확인              | 없음           | Boolean     | `200 OK`, `404 Not Found`     |
-| GET    | `/api/video-like/video/{videoId}/count`               | 영상 좋아요 수                | 없음           | Long        | `200 OK`, `404 Not Found`     |
-| DELETE | `/api/video-like/user/{userId}/video/{videoId}`       | 좋아요 취소                   | 없음           | 없음        | `200 OK`, `404 Not Found`     |
+- 프로필 사진을 등록하면 header와 마이페이지 내 화면에서 동시에 바뀌도록 처리해주는 게 어려웠음
+- 폼 제출 버튼을 누르기 전에는 미리보기만 변경되고, 수정 완료 버튼을 누르면 프로필 사진이 표시되는 부분들 일괄 변경되도록 처리
+- 유저가 프로필 사진을 변경할 때마다 서버 측에 새로운 파일로 저장되는 문제 발견  
+   -> 기존 파일 삭제 후 새로운 이미지 저장하는 방식으로 해결
+
+#### 7. 팔로우
+
+마이 페이지 내에서 following, follower 유저 목록 확인 가능  
+유저 목록에서 내가 이미 팔로우하고 있는지 여부에 따라 다른 버튼 UI (following / follow) 제공  
+본인 팔로우 불가능
+
+- Following / Follower 목록을 요청하는 버튼은 마이페이지 컴포넌트에 포함되어 있고, 유저 리스트는 별개의 컴포넌트라 팔로우 동작에 따라 숫자 갱신하는 데서 어려움을 겪음
+  - 이벤트 발생에 따라 숫자를 ++, -- 로 직접 조정하는 방식은 빠르고 간편하지만 오류 발생 시 db와 데이터가 달라질 우려가 있었고, 심지어 중간에 꼬여서 음수값으로 넘어가는 경우도 생겼음
+  - 그렇다고 매번 유저 정보를 갱신하자니 뭔가 비효율적으로 정보를 다 가져오는 느낌
+  - 어차피 유저 목록을 띄워야 하므로, 팔로잉 팔로우 목록을 불러오면서 불러온 배열의 length 값과 함께 emit 하는 방식으로 해결
+- 백엔드에서 리스트 불러올 때 매번 불러온 배열 전체를 돌면서 isFollowed 여부를 체크해서 매핑하고 가져오는 게 언짢았음. 더 효율적인 방법이 있지 않았을까.
+  - lombok 에서는 boolean형 변수명을 isFollowed로 지으면 getter setter에서 자동으로 is를 떼고 인식함.
 
 <br>
 <br>
-<br>
 
-## 📌 ERD
+## 📌 최종 화면 디자인
 
-![erd](./aboutPJT/pjt_final_erd.png)
-
-## 📌 화면 디자인
-
-![회원가입](./aboutPJT/1_회원가입.jpg)
-![로그인](./aboutPJT/2_로그인.jpg)
-![아이디찾기](./aboutPJT/3_아이디찾기.jpg)
-![비밀번호찾기](./aboutPJT/4_비밀번호찾기.jpg)
-![비밀번호재설정](./aboutPJT/5_비밀번호재설정.jpg)
-![메인](./aboutPJT/6_메인.jpg)
-![정렬기준](./aboutPJT/7_정렬기준.jpg)
-![로그인전헤더](./aboutPJT/8_로그인%20전%20헤더.jpg)
-![로그인후헤더](./aboutPJT/9_로그인%20후%20헤더.jpg)
-![마이페이지](./aboutPJT/10_마이페이지.jpg)
-![영상상세](./aboutPJT/11_영상%20상세페이지.jpg)
-![검색결과](./aboutPJT/12_검색%20결과페이지.jpg)
-![팔로잉팔로워](./aboutPJT/13_팔로잉팔로워.jpg)
+![회원가입](./aboutPJT/views/signup.png)
+![로그인](./aboutPJT/views/login.png)
+![아이디찾기](./aboutPJT/views/findId.png)
+![비밀번호찾기](./aboutPJT/views/findPw.png)
+![비밀번호재설정](./aboutPJT/views/resetPw.png)
+![메인](./aboutPJT/views/main.png)
+![마이페이지](./aboutPJT/views/myPage.png)
+![마이페이지2](./aboutPJT/views/myPage2.png)
+![회원정보수정](./aboutPJT/views/modifyInfo.png)
