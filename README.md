@@ -20,7 +20,8 @@
 
 - Java 기반 Spring Boot 프레임워크를 활용하여 MVC 구조로 설계
 - ORM 프레임워크로 MyBatis를 도입하여 MySQL과의 데이터 연동을 구현
-- <br>
+
+ <br>
 
 ## ⚙️ 기술 스택
 
