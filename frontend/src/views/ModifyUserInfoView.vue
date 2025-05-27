@@ -130,7 +130,7 @@
           <BaseDropBox :options="days" v-model="birthDay" placeholder="일" />
         </div>
       </div>
-      <BaseButton type="submit" text="가입하기" />
+      <BaseButton type="submit" text="수정 완료" />
     </form>
   </div>
 </template>
